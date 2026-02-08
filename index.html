@@ -1,0 +1,1850 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORRSAA - Sistema Integrado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        grotesk: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        slate: { 850: '#1e293b', 950: '#020617' },
+                        brand: { 500: '#0ea5e9', 600: '#0284c7' },
+                        accent: { 500: '#10b981', 600: '#059669' },
+                        danger: { 500: '#ef4444', 600: '#dc2626' }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                        'slide-in-right': 'slideInRight 0.3s ease-out forwards',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideInRight: {
+                            '0%': { opacity: '0', transform: 'translateX(20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* --- ESTILOS GERAIS E COMPARTILHADOS --- */
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        
+        .icon { width: 1.25em; height: 1.25em; display: inline-block; stroke-width: 2; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(30, 41, 59, 0.8);
+        }
+
+        .checkbox-wrapper input:checked + div {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+
+        /* --- ESTILOS ESPECÍFICOS DO SEI (Adaptados para o Tema Dark Unificado) --- */
+        .sei-area { font-family: 'Space Grotesk', sans-serif; }
+        .sei-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .card-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200, 210, 220, 0.4);
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.05);
+        }
+        .dark .card-glass {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(100, 116, 139, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+        
+        /* Utilitários de visibilidade */
+        .hidden-tab { display: none !important; }
+
+        /* Kanban Styles */
+        .kanban-column {
+            min-height: 200px;
+            transition: background-color 0.2s;
+        }
+        .kanban-column.drag-over {
+            background-color: rgba(14, 165, 233, 0.1);
+            border-radius: 0.75rem;
+        }
+
+        /* Calendar Specifics */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: rgba(226, 232, 240, 0.5); /* Lines color */
+        }
+        .dark .calendar-grid {
+            background-color: rgba(51, 65, 85, 0.5);
+        }
+        .calendar-cell {
+            min-height: 120px;
+            transition: background-color 0.2s;
+        }
+        .calendar-cell:hover {
+            background-color: rgba(241, 245, 249, 0.8);
+        }
+        .dark .calendar-cell:hover {
+            background-color: rgba(30, 41, 59, 0.8);
+        }
+        .today-highlight {
+            background-color: #0ea5e9;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500 overflow-hidden">
+    
+    <div id="app" class="h-full flex flex-col md:flex-row">
+        <!-- Loader Inicial -->
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-slate-950 transition-opacity duration-500" id="loader">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="flex items-center gap-2 text-brand-600 font-bold tracking-widest">
+                    CORRSAA
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MENU LATERAL UNIFICADO (SIDEBAR)           -->
+        <!-- ========================================== -->
+        <aside class="hidden md:flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 shrink-0">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-slate-800 flex items-center justify-center shadow-sm border border-brand-100 dark:border-slate-700 text-brand-600">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg tracking-tight leading-none text-slate-800 dark:text-slate-100">CORRSAA</h1>
+                        <p class="text-[10px] font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide mt-1">Alto Acre</p>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Visão Geral</p>
+                    <button onclick="window.switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold bg-brand-50 text-brand-600 dark:bg-slate-800 dark:text-brand-400 ring-1 ring-inset ring-brand-100 dark:ring-slate-700">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        Dashboard
+                    </button>
+                    <button onclick="window.switchTab('calendar')" id="nav-calendar" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Agenda
+                    </button>
+
+                    <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Gestão</p>
+                    <button onclick="window.switchTab('tasks')" id="nav-tasks" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        Tarefas
+                    </button>
+                    <button onclick="window.switchTab('kanban')" id="nav-kanban" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM9 3v18M15 3v18"/></svg>
+                        Kanban
+                    </button>
+                    <button onclick="window.switchTab('sei')" id="nav-sei" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        Gestão SEI
+                    </button>
+                    
+                    <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Sistema</p>
+                    <button onclick="window.switchTab('admin')" id="nav-admin" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6a1 1 0 0 0-1 1v9a1 1 0 0 0 2 0V7a1 1 0 0 0-1-1z"/></svg>
+                        Administração
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-auto p-6 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                <button onclick="window.requestNotificationPermission()" class="w-full py-2 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors" title="Ativar Notificações">
+                    <svg class="icon w-4 h-4" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    Alertas
+                </button>
+                <button onclick="window.openBackupModal()" class="w-full py-2 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    <svg class="icon w-4 h-4" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Backup & Dados
+                </button>
+                <button onclick="window.toggleTheme()" class="w-full py-2 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    <span id="theme-icon-container"></span>
+                    <span id="theme-text">Alterar Tema</span>
+                </button>
+
+                <!-- INDICADOR DE STATUS DO BANCO DE DADOS -->
+                <div class="pt-4 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-1000 delay-500" id="db-status-indicator">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Banco de Dados Conectado</span>
+                </div>
+                
+                <!-- CREDITOS -->
+                <div class="pt-2 text-center">
+                    <p class="text-[9px] font-medium text-slate-400 dark:text-slate-600">Desenvolvido por:<br>Albuquerque Sistemas</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Menu Mobile (Corrigido para incluir todos os itens) -->
+        <div class="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0 overflow-x-auto">
+            <div class="flex items-center gap-2 shrink-0 mr-4">
+                 <svg class="w-6 h-6 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                 <span class="font-bold text-lg text-slate-800 dark:text-white">CORRSAA</span>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="window.switchTab('dashboard')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Dashboard"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
+                <button onclick="window.switchTab('calendar')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Agenda"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
+                <button onclick="window.switchTab('tasks')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Tarefas"><svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
+                <button onclick="window.switchTab('kanban')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Kanban"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM9 3v18M15 3v18"/></svg></button>
+                <button onclick="window.switchTab('sei')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="SEI"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
+                <button onclick="window.switchTab('admin')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Admin"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+            </div>
+        </div>
+
+        <!-- AREA DE CONTEUDO PRINCIPAL -->
+        <main class="flex-1 overflow-hidden relative bg-slate-50/50 dark:bg-slate-950">
+            
+            <!-- ABA 0: DASHBOARD -->
+            <div id="tab-dashboard" class="h-full flex flex-col overflow-y-auto p-6 md:p-8">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-1" id="dash-welcome">Bom dia, Usuário</h2>
+                    <p class="text-slate-500 dark:text-slate-400">Aqui está o resumo das suas atividades hoje.</p>
+                </header>
+
+                <!-- Resumo Geral -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('tasks')">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
+                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-total-tasks">0</p>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Tarefas Pendentes</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('tasks')">
+                        <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 flex items-center justify-center">
+                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-urgent-tasks">0</p>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Tarefas Urgentes</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('sei')">
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center">
+                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-total-sei">0</p>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Processos Ativos</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('sei')">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center">
+                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-expiring-sei">0</p>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">SEI Vencendo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listas Rápidas (3 COLUNAS) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- 1. Tarefas Prioritárias -->
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col h-full">
+                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span> Tarefas Críticas
+                        </h3>
+                        <div class="space-y-3 flex-1" id="dash-tasks-list">
+                            <!-- JS -->
+                        </div>
+                    </div>
+
+                    <!-- 2. SEI Próximos -->
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col h-full">
+                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Prazos SEI
+                        </h3>
+                        <div class="space-y-3 flex-1" id="dash-sei-list">
+                            <!-- JS -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Eventos Agendados -->
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col h-full">
+                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-500"></span> Eventos da Semana
+                        </h3>
+                        <div class="space-y-3 flex-1" id="dash-events-list">
+                            <!-- JS will populate this -->
+                            <p class="text-sm text-slate-400">Carregando...</p>
+                        </div>
+                        <button onclick="window.switchTab('calendar')" class="mt-4 w-full py-2 text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/10 rounded-lg hover:bg-brand-100 dark:hover:bg-brand-900/20 transition-colors">Ver Agenda Completa</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ABA 1: AGENDA (CALENDAR) -->
+            <div id="tab-calendar" class="h-full flex flex-col overflow-hidden hidden-tab bg-white dark:bg-slate-950">
+                <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight" id="calendar-title">Outubro 2023</h2>
+                        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                            <button onclick="window.changeMonth(-1)" class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm transition-all"><svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                            <button onclick="window.changeMonth(1)" class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm transition-all"><svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+                        </div>
+                        <button onclick="window.goToToday()" class="px-3 py-1.5 text-sm font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">Hoje</button>
+                    </div>
+                    <button onclick="window.openEventModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
+                        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> <span class="hidden md:inline">Evento</span>
+                    </button>
+                </header>
+                
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <!-- Weekday Headers (Com min-width para mobile) -->
+                    <div class="overflow-x-auto">
+                        <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 min-w-[700px]">
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Dom</div>
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Seg</div>
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Ter</div>
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Qua</div>
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Qui</div>
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Sex</div>
+                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Sáb</div>
+                        </div>
+                    </div>
+                    <!-- Calendar Grid (Com min-width para mobile) -->
+                    <div class="flex-1 overflow-auto custom-scrollbar bg-slate-200 dark:bg-slate-800">
+                        <div id="calendar-grid" class="calendar-grid h-full w-full min-w-[700px]">
+                            <!-- JS generated cells -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 2: GESTÃO DE TAREFAS -->
+            <div id="tab-tasks" class="h-full flex flex-col overflow-hidden hidden-tab">
+                <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5" id="task-date-display"></p>
+                        <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Painel de Demandas</h2>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="relative group w-full md:w-auto">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </div>
+                            <input type="text" placeholder="Buscar protocolo..." oninput="window.setTaskSearch(this.value)" class="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none w-full md:w-64">
+                        </div>
+                        <button onclick="window.openTaskModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
+                            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> <span class="hidden md:inline">Nova</span>
+                        </button>
+                    </div>
+                </header>
+                <div class="flex-1 overflow-y-auto p-6 scrollbar-thin pb-20" id="tasks-container"></div>
+            </div>
+
+            <!-- ABA 3: KANBAN -->
+            <div id="tab-kanban" class="h-full flex flex-col overflow-hidden hidden-tab bg-slate-100 dark:bg-slate-900">
+                <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 bg-white/80 dark:bg-slate-900/80">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Quadro Kanban</h2>
+                        <p class="text-xs text-slate-500">Arraste e solte para mover as tarefas</p>
+                    </div>
+                    <button onclick="window.openTaskModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
+                        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> <span class="hidden md:inline">Nova Tarefa</span>
+                    </button>
+                </header>
+                <div class="flex-1 overflow-x-auto overflow-y-hidden p-6">
+                    <div class="flex h-full gap-6 min-w-[800px]">
+                        <!-- Coluna: A Fazer -->
+                        <div class="flex-1 flex flex-col min-w-[280px] bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl p-4">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center justify-between">
+                                A Fazer <span class="bg-slate-300 dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs" id="count-todo">0</span>
+                            </h3>
+                            <div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-todo" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)">
+                                <!-- Items -->
+                            </div>
+                        </div>
+                        <!-- Coluna: Em Andamento -->
+                        <div class="flex-1 flex flex-col min-w-[280px] bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-4 border border-blue-100 dark:border-blue-900/20">
+                            <h3 class="font-bold text-blue-700 dark:text-blue-300 mb-4 flex items-center justify-between">
+                                Em Andamento <span class="bg-blue-200 dark:bg-blue-800 px-2 py-0.5 rounded-full text-xs" id="count-doing">0</span>
+                            </h3>
+                            <div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-doing" ondrop="drop(event, 'doing')" ondragover="allowDrop(event)">
+                                <!-- Items -->
+                            </div>
+                        </div>
+                        <!-- Coluna: Concluído -->
+                        <div class="flex-1 flex flex-col min-w-[280px] bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-4 border border-green-100 dark:border-green-900/20">
+                            <h3 class="font-bold text-green-700 dark:text-green-300 mb-4 flex items-center justify-between">
+                                Concluído <span class="bg-green-200 dark:bg-green-800 px-2 py-0.5 rounded-full text-xs" id="count-done">0</span>
+                            </h3>
+                            <div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-done" ondrop="drop(event, 'done')" ondragover="allowDrop(event)">
+                                <!-- Items -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 4: GESTÃO SEI -->
+            <div id="tab-sei" class="h-full flex flex-col overflow-hidden hidden-tab sei-area">
+                <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                    <div>
+                        <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-amber-600 dark:from-white dark:to-slate-300">
+                            Sistema Eletrônico de Informações - SEI
+                        </h2>
+                        <p class="text-xs text-slate-500 font-light">Processos Eletrônicos</p>
+                    </div>
+                    <div class="flex gap-3">
+                         <button onclick="window.openSeiModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 dark:bg-white dark:text-slate-900 text-white rounded-xl font-semibold shadow-lg transition-all flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg> 
+                            Novo SEI 
+                        </button>
+                    </div>
+                </header>
+                <div class="flex-1 overflow-y-auto p-6 scrollbar-thin pb-20">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                        <!-- Stats SEI -->
+                        <div class="card-glass rounded-2xl p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+                            <div><p class="text-2xl font-bold text-slate-900 dark:text-white" id="sei-stat-total">0</p><p class="text-[10px] text-slate-500 uppercase tracking-wide">Total</p></div>
+                        </div>
+                        <!-- ... (Outros stats mantidos via JS) ... -->
+                    </div>
+                    <!-- Filtros e Alertas -->
+                    <div class="card-glass rounded-2xl p-4 mb-6">
+                        <div class="flex flex-col md:flex-row gap-4 items-center">
+                            <div class="flex-1 relative w-full">
+                                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                <input type="text" id="sei-search" oninput="window.setSeiSearch(this.value)" placeholder="Buscar nº sei, assunto..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 custom-scrollbar" id="sei-filters-container"></div>
+                        </div>
+                    </div>
+                    <div id="sei-alerts-container" class="mb-6"></div>
+                    <div class="card-glass rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 dark:bg-slate-800/50">
+                                    <tr>
+                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Nº SEI</th>
+                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider min-w-[200px]">Assunto</th>
+                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Direção</th>
+                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Responsável</th>
+                                        <th class="text-center py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Prioridade</th>
+                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Prazo</th>
+                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                        <th class="text-right py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sei-list-container" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                        <div id="sei-empty-state" class="hidden py-16 text-center">
+                            <p class="text-slate-500">Nenhum processo encontrado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 5: ADMINISTRAÇÃO -->
+            <div id="tab-admin" class="h-full flex flex-col overflow-y-auto hidden-tab p-6 md:p-8">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-1">Administração do Sistema</h2>
+                    <p class="text-slate-500 dark:text-slate-400">Ferramentas de limpeza e manutenção de dados.</p>
+                </header>
+
+                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-8">
+                    <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+                        <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600 dark:text-red-400">
+                             <svg class="icon w-6 h-6" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Limpeza Automática de Dados</h3>
+                            <p class="text-sm text-slate-500">Exclua permanentemente registros antigos e arquivados para liberar espaço.</p>
+                        </div>
+                    </div>
+
+                    <!-- Configuração de Dias -->
+                    <div class="mb-8 max-w-xs">
+                        <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">Critério de Antiguidade (Dias)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="admin-days" value="30" min="1" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold outline-none focus:ring-2 focus:ring-brand-500 transition-all text-center">
+                            <span class="text-slate-500 text-sm font-medium">dias</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Registros fechados há mais tempo que isso serão considerados "antigos".</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Card Tarefas -->
+                        <div class="bg-slate-50 dark:bg-slate-950 rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center">
+                            <div class="mb-4">
+                                <span class="text-4xl font-black text-slate-700 dark:text-slate-300" id="admin-count-tasks">0</span>
+                                <p class="text-xs font-bold uppercase text-slate-400 mt-1">Tarefas Antigas</p>
+                            </div>
+                            <p class="text-sm text-slate-500 mb-6">Tarefas concluídas a mais de <span class="admin-days-display">30</span> dias.</p>
+                            <button onclick="window.deleteOldItems('tasks')" class="w-full py-3 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold rounded-xl transition-all shadow-sm">
+                                Excluir Tarefas
+                            </button>
+                        </div>
+
+                        <!-- Card SEI -->
+                        <div class="bg-slate-50 dark:bg-slate-950 rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center">
+                            <div class="mb-4">
+                                <span class="text-4xl font-black text-slate-700 dark:text-slate-300" id="admin-count-sei">0</span>
+                                <p class="text-xs font-bold uppercase text-slate-400 mt-1">SEI Arquivados</p>
+                            </div>
+                            <p class="text-sm text-slate-500 mb-6">Processos arquivados a mais de <span class="admin-days-display">30</span> dias.</p>
+                            <button onclick="window.deleteOldItems('sei')" class="w-full py-3 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold rounded-xl transition-all shadow-sm">
+                                Excluir Processos
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                            <strong>Atenção:</strong> A exclusão por esta ferramenta remove permanentemente os dados do banco de dados. Certifique-se de fazer um backup antes de realizar limpezas em massa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Container Global para Modais -->
+    <div id="modal-container"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, updateDoc, deleteDoc, onSnapshot, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXayopq4MYdUMxSNpxUzrDSVI4E0cvzSA",
+            authDomain: "projectcorrsaa.firebaseapp.com",
+            projectId: "projectcorrsaa",
+            storageBucket: "projectcorrsaa.firebasestorage.app",
+            messagingSenderId: "195329055930",
+            appId: "1:195329055930:web:01783b88ccaf2d9dfbf683",
+            measurementId: "G-SNGPRWRP40"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'projectcorrsaa';
+
+        // ESTADO GLOBAL
+        let user = null;
+        let isDarkMode = localStorage.getItem('theme') === 'dark';
+        let currentTab = 'dashboard';
+
+        // ESTADO DE DADOS
+        let tasks = [];
+        let seiData = [];
+        let calendarData = []; // Estado para eventos da agenda
+        let taskFilter = 'active';
+        let taskSearch = '';
+        let seiSearch = '';
+        let seiFilterStatus = 'active';
+        let currentCalendarDate = new Date();
+
+        if (isDarkMode) document.documentElement.classList.add('dark');
+        updateThemeIcon();
+        updateDateDisplay();
+
+        // ---------------- AUTH ----------------
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try { await signInWithCustomToken(auth, __initial_auth_token); } 
+                    catch (e) { await signInAnonymously(auth); }
+                } else { await signInAnonymously(auth); }
+            } catch (error) { try { await signInAnonymously(auth); } catch(e){} }
+        }
+
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            if (user) {
+                setupTaskListener();
+                setupSeiListener();
+                setupCalendarListener();
+                const dbIndicator = document.getElementById('db-status-indicator');
+                if(dbIndicator) dbIndicator.classList.remove('opacity-0');
+            }
+        });
+
+        // ---------------- DATA LISTENERS ----------------
+        function setupTaskListener() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'tasks'), (snapshot) => {
+                tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTasks();
+                renderDashboard();
+                renderKanban();
+                renderAdmin();
+                checkDeadlinesAndNotify();
+                const loader = document.getElementById('loader');
+                if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 500); }
+            });
+        }
+
+        function setupSeiListener() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'sei_processes'), (snapshot) => {
+                seiData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSeiList();
+                updateSeiStats();
+                renderDashboard();
+                renderAdmin();
+                checkDeadlinesAndNotify();
+            });
+        }
+
+        function setupCalendarListener() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snapshot) => {
+                calendarData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCalendar(); 
+                renderDashboard(); // Atualiza dashboard com eventos
+            });
+        }
+
+        // ---------------- CALENDAR (AGENDA) LOGIC ----------------
+        function renderCalendar() {
+            if(currentTab !== 'calendar' && document.getElementById('tab-calendar').classList.contains('hidden-tab')) return;
+
+            const grid = document.getElementById('calendar-grid');
+            if(!grid) return;
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // Set Title
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('calendar-title').innerText = `${monthNames[month]} ${year}`;
+
+            // Calc dates
+            const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            let html = '';
+
+            // Previous Month Fillers
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const d = daysInPrevMonth - i;
+                html += `<div class="calendar-cell bg-white/50 dark:bg-slate-900/30 p-2 text-slate-300 dark:text-slate-600 select-none pointer-events-none text-right"><span class="text-sm font-medium">${d}</span></div>`;
+            }
+
+            // Current Month
+            const today = new Date();
+            const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const isToday = isCurrentMonth && today.getDate() === i;
+                
+                // Filter events for this day
+                const dayEvents = calendarData.filter(e => e.date === dateStr).sort((a,b) => (a.time || '23:59').localeCompare(b.time || '23:59'));
+
+                const eventsHtml = dayEvents.map(e => {
+                    const colorMap = {
+                        'meeting': 'bg-blue-100 text-blue-700 border-blue-200',
+                        'deadline': 'bg-red-100 text-red-700 border-red-200',
+                        'personal': 'bg-purple-100 text-purple-700 border-purple-200',
+                        'general': 'bg-slate-100 text-slate-700 border-slate-200'
+                    };
+                    const colorClass = colorMap[e.type] || colorMap['general'];
+                    return `
+                        <div onclick="event.stopPropagation(); window.openEventModal('${e.id}')" 
+                             class="text-[10px] p-1 mb-1 rounded border ${colorClass} truncate cursor-pointer hover:opacity-80 transition-opacity font-semibold">
+                            ${e.time ? `<span class="opacity-75 mr-1">${e.time}</span>` : ''}${e.title}
+                        </div>
+                    `;
+                }).join('');
+
+                html += `
+                    <div class="calendar-cell bg-white dark:bg-slate-900 p-2 flex flex-col h-full cursor-pointer" onclick="window.openEventModal(null, '${dateStr}')">
+                        <div class="text-right mb-1">
+                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 inline-block ${isToday ? 'today-highlight' : ''}">${i}</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar">
+                            ${eventsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Next Month Fillers to complete grid (42 cells total usually covers 6 rows)
+            const totalCells = firstDay + daysInMonth;
+            const remaining = 7 - (totalCells % 7);
+            if (remaining < 7) {
+                for (let i = 1; i <= remaining; i++) {
+                    html += `<div class="calendar-cell bg-white/50 dark:bg-slate-900/30 p-2 text-slate-300 dark:text-slate-600 select-none pointer-events-none text-right"><span class="text-sm font-medium">${i}</span></div>`;
+                }
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function changeMonth(step) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + step);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentCalendarDate = new Date();
+            renderCalendar();
+        }
+
+        function openEventModal(id = null, datePrefill = null) {
+            let evt = { title: '', date: datePrefill || new Date().toISOString().split('T')[0], time: '', type: 'general', description: '' };
+            if(id) evt = calendarData.find(e => e.id === id);
+
+            const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-2xl md:rounded-2xl shadow-2xl animate-fade-in-up overflow-hidden max-h-[90vh] flex flex-col">
+                        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">${id ? 'Editar Evento' : 'Novo Evento'}</h2>
+                            <button onclick="window.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">✕</button>
+                        </div>
+                        <form id="event-form" class="p-6 overflow-y-auto space-y-4">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Título</label><input id="e-title" required value="${evt.title}" class="w-full text-lg font-bold bg-transparent border-b-2 border-slate-200 dark:border-slate-700 outline-none py-2" placeholder="Ex: Reunião de Pauta"></div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-slate-500 uppercase">Data</label><input type="date" id="e-date" required value="${evt.date}" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-3 text-sm outline-none"></div>
+                                <div><label class="text-xs font-bold text-slate-500 uppercase">Hora (Opcional)</label><input type="time" id="e-time" value="${evt.time}" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-3 text-sm outline-none"></div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Categoria</label>
+                                <div class="grid grid-cols-4 gap-2 mt-2">
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="e-type" value="meeting" class="sr-only peer" ${evt.type === 'meeting' ? 'checked' : ''}>
+                                        <div class="text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:bg-blue-100 peer-checked:border-blue-300 peer-checked:text-blue-700 text-xs font-bold transition-all">Reunião</div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="e-type" value="deadline" class="sr-only peer" ${evt.type === 'deadline' ? 'checked' : ''}>
+                                        <div class="text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:bg-red-100 peer-checked:border-red-300 peer-checked:text-red-700 text-xs font-bold transition-all">Prazo</div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="e-type" value="personal" class="sr-only peer" ${evt.type === 'personal' ? 'checked' : ''}>
+                                        <div class="text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:bg-purple-100 peer-checked:border-purple-300 peer-checked:text-purple-700 text-xs font-bold transition-all">Pessoal</div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="e-type" value="general" class="sr-only peer" ${evt.type === 'general' ? 'checked' : ''}>
+                                        <div class="text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:bg-slate-200 peer-checked:border-slate-400 peer-checked:text-slate-800 text-xs font-bold transition-all">Geral</div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Descrição</label><textarea id="e-desc" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-sm outline-none resize-none">${evt.description || ''}</textarea></div>
+                            
+                            <div class="flex gap-3 pt-2">
+                                ${id ? `<button type="button" onclick="window.deleteEvent('${id}')" class="px-4 py-3 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-xl transition-colors">Excluir</button>` : ''}
+                                <button type="submit" class="flex-1 py-3 bg-brand-600 text-white font-bold rounded-xl shadow-lg hover:bg-brand-500 transition-colors">Salvar Evento</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.getElementById('event-form').onsubmit = (e) => {
+                e.preventDefault();
+                const typeEl = document.querySelector('input[name="e-type"]:checked');
+                saveEvent({
+                    title: document.getElementById('e-title').value,
+                    date: document.getElementById('e-date').value,
+                    time: document.getElementById('e-time').value,
+                    type: typeEl ? typeEl.value : 'general',
+                    description: document.getElementById('e-desc').value
+                }, id);
+            }
+        }
+
+        async function saveEvent(eventData, id = null) {
+            if (!user) return;
+            try {
+                const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+                if (id) await updateDoc(doc(collectionRef, id), eventData);
+                else await addDoc(collectionRef, { ...eventData, createdAt: new Date().toISOString() });
+                showToast("Evento salvo!", "success");
+                closeModal();
+            } catch (e) { showToast("Erro ao salvar", "error"); }
+        }
+
+        async function deleteEvent(id) {
+            if(!confirm("Excluir este evento?")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id));
+                showToast("Evento removido");
+                closeModal();
+            } catch (e) { showToast("Erro ao remover", "error"); }
+        }
+
+        // ---------------- DASHBOARD & GENERAL ----------------
+        function renderDashboard() {
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'Bom dia' : (hour < 18 ? 'Boa tarde' : 'Boa noite');
+            const welcomeEl = document.getElementById('dash-welcome');
+            if(welcomeEl) welcomeEl.innerText = `${greeting}, Usuário`;
+
+            const totalTasks = tasks.filter(t => !t.completed).length;
+            const urgentTasks = tasks.filter(t => !t.completed && t.priority === 'high').length;
+            const totalSei = seiData.filter(s => s.status !== 'arquivado' && s.status !== 'respondido').length;
+            const expiringSei = seiData.filter(s => {
+                const ds = getDeadlineStatus(s);
+                return (s.status !== 'arquivado' && s.status !== 'respondido') && (ds === 'overdue' || ds === 'soon');
+            }).length;
+
+            setText('dash-total-tasks', totalTasks);
+            setText('dash-urgent-tasks', urgentTasks);
+            setText('dash-total-sei', totalSei);
+            setText('dash-expiring-sei', expiringSei);
+
+            const taskListEl = document.getElementById('dash-tasks-list');
+            if(taskListEl) {
+                const critTasks = tasks.filter(t => !t.completed && t.priority === 'high').slice(0, 5);
+                taskListEl.innerHTML = critTasks.length ? critTasks.map(t => `
+                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" onclick="window.switchTab('tasks');window.openTaskModal('${t.id}')">
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">${t.title}</span>
+                        <span class="text-[10px] font-bold text-red-500 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">Alta</span>
+                    </div>
+                `).join('') : '<p class="text-sm text-slate-400">Nenhuma tarefa crítica.</p>';
+            }
+
+            const seiListEl = document.getElementById('dash-sei-list');
+            if(seiListEl) {
+                const critSei = seiData.filter(s => {
+                    const ds = getDeadlineStatus(s);
+                    return (s.status !== 'arquivado' && s.status !== 'respondido') && (ds === 'overdue' || ds === 'soon');
+                }).slice(0, 5);
+                seiListEl.innerHTML = critSei.length ? critSei.map(s => {
+                    const ds = getDeadlineStatus(s);
+                    const color = ds === 'overdue' ? 'text-red-500 bg-red-100' : 'text-amber-600 bg-amber-100';
+                    return `
+                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" onclick="window.switchTab('sei');window.openSeiModal('${s.id}')">
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">${s.numero_sei}</span>
+                        <span class="text-[10px] font-bold ${color} dark:bg-opacity-20 px-2 py-1 rounded">${ds === 'overdue' ? 'Atrasado' : 'Vence logo'}</span>
+                    </div>
+                `}).join('') : '<p class="text-sm text-slate-400">Nenhum processo vencendo.</p>';
+            }
+
+            // --- EVENTS LIST (NEW) ---
+            const eventsListEl = document.getElementById('dash-events-list');
+            if(eventsListEl) {
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const nextWeek = new Date(today);
+                nextWeek.setDate(today.getDate() + 7);
+
+                const upcomingEvents = calendarData.filter(e => {
+                    const eventDate = new Date(e.date + 'T00:00:00'); 
+                    return eventDate >= today && eventDate <= nextWeek;
+                }).sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+
+                eventsListEl.innerHTML = upcomingEvents.length ? upcomingEvents.map(e => {
+                    const dateObj = new Date(e.date + 'T00:00:00');
+                    const day = dateObj.getDate();
+                    const month = dateObj.toLocaleDateString('pt-BR', {month: 'short'}).replace('.','');
+                    const typeLabel = { 'meeting': 'Reunião', 'deadline': 'Prazo', 'personal': 'Pessoal', 'general': 'Geral' }[e.type];
+                    
+                    return `
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer" onclick="window.switchTab('calendar');window.openEventModal('${e.id}')">
+                        <div class="flex flex-col items-center justify-center w-10 h-10 bg-white dark:bg-slate-700 rounded-lg shadow-sm border border-slate-100 dark:border-slate-600 shrink-0">
+                            <span class="text-[8px] font-bold text-slate-400 uppercase leading-none mb-0.5">${month}</span>
+                            <span class="text-sm font-bold text-slate-800 dark:text-white leading-none">${day}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${e.title}</p>
+                            <p class="text-[10px] text-slate-500 font-medium">${e.time || 'Dia todo'} • ${typeLabel}</p>
+                        </div>
+                    </div>
+                `}).join('') : '<div class="flex flex-col items-center py-4"><span class="text-2xl mb-2">📅</span><p class="text-xs text-slate-400">Sem eventos esta semana</p></div>';
+            }
+        }
+
+        function setText(id, val) { const el = document.getElementById(id); if(el) el.innerText = val; }
+
+        // ---------------- ADMINISTRAÇÃO ----------------
+        function renderAdmin() {
+            if(currentTab !== 'admin') return; 
+
+            const daysInput = document.getElementById('admin-days');
+            const days = parseInt(daysInput.value) || 30;
+            
+            document.querySelectorAll('.admin-days-display').forEach(el => el.innerText = days);
+
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+
+            const oldTasks = tasks.filter(t => {
+                if(!t.completed) return false;
+                const dateToCheck = t.completedAt ? new Date(t.completedAt) : new Date(t.createdAt);
+                return dateToCheck < cutoffDate;
+            });
+
+            const oldSei = seiData.filter(s => {
+                if(s.status !== 'arquivado') return false;
+                const dateToCheck = s.createdAt ? new Date(s.createdAt) : new Date();
+                return dateToCheck < cutoffDate;
+            });
+
+            setText('admin-count-tasks', oldTasks.length);
+            setText('admin-count-sei', oldSei.length);
+
+            daysInput.onchange = renderAdmin;
+            daysInput.onkeyup = renderAdmin;
+        }
+
+        async function deleteOldItems(type) {
+            const daysInput = document.getElementById('admin-days');
+            const days = parseInt(daysInput.value) || 30;
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+            
+            let itemsToDelete = [];
+            let collectionName = '';
+
+            if (type === 'tasks') {
+                collectionName = 'tasks';
+                itemsToDelete = tasks.filter(t => {
+                    if(!t.completed) return false;
+                    const dateToCheck = t.completedAt ? new Date(t.completedAt) : new Date(t.createdAt);
+                    return dateToCheck < cutoffDate;
+                });
+            } else {
+                collectionName = 'sei_processes';
+                itemsToDelete = seiData.filter(s => {
+                    if(s.status !== 'arquivado') return false;
+                    const dateToCheck = s.createdAt ? new Date(s.createdAt) : new Date();
+                    return dateToCheck < cutoffDate;
+                });
+            }
+
+            if (itemsToDelete.length === 0) return showToast("Nenhum item encontrado para excluir.", "error");
+
+            if (!confirm(`Tem certeza que deseja EXCLUIR PERMANENTEMENTE ${itemsToDelete.length} itens? Esta ação não pode ser desfeita.`)) return;
+
+            showToast("Iniciando exclusão em massa...", "warning");
+
+            const batch = writeBatch(db);
+            let count = 0;
+            
+            const chunkSize = 400; 
+            for (let i = 0; i < itemsToDelete.length; i += chunkSize) {
+                const chunk = itemsToDelete.slice(i, i + chunkSize);
+                const batch = writeBatch(db);
+                chunk.forEach(item => {
+                    const ref = doc(db, 'artifacts', appId, 'public', 'data', collectionName, item.id);
+                    batch.delete(ref);
+                });
+                await batch.commit();
+            }
+
+            showToast(`${itemsToDelete.length} itens excluídos com sucesso!`);
+            renderAdmin();
+        }
+
+        // ---------------- KANBAN ----------------
+        function renderKanban() {
+            const colTodo = document.getElementById('col-todo');
+            const colDoing = document.getElementById('col-doing');
+            const colDone = document.getElementById('col-done');
+            if(!colTodo) return;
+
+            colTodo.innerHTML = ''; colDoing.innerHTML = ''; colDone.innerHTML = '';
+            let cTodo=0, cDoing=0, cDone=0;
+
+            tasks.forEach(t => {
+                let status = t.status || (t.completed ? 'done' : 'todo');
+                const card = createKanbanCard(t);
+                
+                if (status === 'done') { colDone.appendChild(card); cDone++; }
+                else if (status === 'doing') { colDoing.appendChild(card); cDoing++; }
+                else { colTodo.appendChild(card); cTodo++; }
+            });
+
+            setText('count-todo', cTodo);
+            setText('count-doing', cDoing);
+            setText('count-done', cDone);
+        }
+
+        function createKanbanCard(t) {
+            const el = document.createElement('div');
+            el.className = "bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 cursor-grab active:cursor-grabbing hover:shadow-md transition-all";
+            el.draggable = true;
+            el.ondragstart = (ev) => drag(ev, t.id);
+            const pColor = t.priority === 'high' ? 'bg-red-500' : (t.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500');
+            el.innerHTML = `
+                <div class="flex gap-2 mb-2">
+                    <div class="w-1 h-8 rounded-full ${pColor}"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${t.title}</p>
+                        <p class="text-[10px] text-slate-500 truncate">${t.responsible || 'Ñ atribuído'}</p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-slate-400">
+                    <span>${t.dueDate ? calculateDaysRemaining(t.dueDate) + ' dias' : ''}</span>
+                    <button onclick="window.openTaskModal('${t.id}')" class="hover:text-brand-500">Editar</button>
+                </div>
+            `;
+            return el;
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev, id) { ev.dataTransfer.setData("text", id); }
+        async function drop(ev, status) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            const task = tasks.find(t => t.id === id);
+            if(task) {
+                const completed = status === 'done';
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id), {
+                    status: status,
+                    completed: completed,
+                    completedAt: completed ? new Date().toISOString() : null
+                });
+            }
+        };
+
+        // ---------------- CONVERSÃO RÁPIDA (SEI -> TASK) ----------------
+        function createTaskFromSei(seiId) {
+            const sei = seiData.find(s => s.id === seiId);
+            if(!sei) return;
+            window.prefillTask = {
+                title: `SEI ${sei.numero_sei}: ${sei.assunto}`,
+                description: `Tarefa gerada a partir do processo SEI ${sei.numero_sei}.\nObservações originais: ${sei.observacoes || 'Nenhuma'}`,
+                dueDate: sei.prazo_resposta || '',
+                responsible: sei.responsavel || '',
+                priority: sei.prioridade === 'critica' || sei.prioridade === 'alta' ? 'high' : 'medium'
+            };
+            window.switchTab('tasks');
+            window.openTaskModal(null, true); 
+        }
+
+        // ---------------- NOTIFICAÇÕES ----------------
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("Este navegador não suporta notificações de sistema.");
+            } else if (Notification.permission === "granted") {
+                showToast("Notificações já estão ativas!");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") showToast("Notificações ativadas!");
+                });
+            }
+        };
+
+        function checkDeadlinesAndNotify() {
+            if (Notification.permission !== "granted") return;
+            tasks.forEach(t => {
+                if(!t.completed && t.dueDate) {
+                    const days = calculateDaysRemaining(t.dueDate);
+                    if(days === 1) notify(`Tarefa Vencendo: ${t.title}`, "Vence amanhã!");
+                }
+            });
+            seiData.forEach(s => {
+                if(s.status !== 'arquivado' && s.status !== 'respondido' && s.prazo_resposta) {
+                    const days = calculateDaysRemaining(s.prazo_resposta);
+                    if(days === 1) notify(`SEI Vencendo: ${s.numero_sei}`, "Prazo encerra amanhã!");
+                }
+            });
+        }
+
+        function notify(title, body) {
+            if(Notification.permission === "granted") {
+                 new Notification("CORRSAA Alerta", { body: `${title} - ${body}`, icon: '' });
+            }
+        }
+
+        // ---------------- HELPERS & SAVING ----------------
+        function updateThemeIcon() {
+            const btn = document.getElementById('theme-icon-container');
+            const text = document.getElementById('theme-text');
+            if (isDarkMode) {
+                btn.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>`;
+                text.innerText = "Modo Claro";
+            } else {
+                btn.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+                text.innerText = "Modo Escuro";
+            }
+        }
+        
+        function updateDateDisplay() {
+            const el = document.getElementById('task-date-display');
+            if(el) {
+                const dateStr = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+                el.innerHTML = `<svg class="icon w-3 h-3" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${dateStr}`;
+            }
+        }
+
+        async function saveTask(taskData, id = null) {
+            if (!user) return;
+            const btn = document.querySelector('#task-form button[type="submit"]');
+            if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
+            try {
+                if(!taskData.status) taskData.status = 'todo'; 
+                if (id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id), taskData);
+                else await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'tasks'), { ...taskData, createdAt: new Date().toISOString(), completed: false, status: 'todo' });
+                showToast("Salvo com sucesso", "success");
+                closeModal();
+            } catch (e) { showToast("Erro ao salvar: " + e.message, "error"); if(btn) { btn.disabled = false; btn.innerText = "Salvar"; } }
+        }
+
+        async function saveSei(seiRecord, id = null) {
+            if(!user) return;
+            const btn = document.querySelector('#sei-form button[type="submit"]');
+            if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
+            try {
+                if (id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sei_processes', id), seiRecord);
+                else await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'sei_processes'), { ...seiRecord, createdAt: new Date().toISOString() });
+                showToast("Salvo com sucesso", "success");
+                closeModal();
+            } catch (e) { showToast("Erro ao salvar: " + e.message, "error"); if(btn) { btn.disabled = false; btn.innerText = "Salvar"; } }
+        }
+
+        async function deleteTask(id) { 
+             try {
+                const btn = document.getElementById('btn-confirm-delete');
+                if(btn) { btn.disabled = true; btn.innerText = "Excluindo..."; }
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id));
+                showToast("Removido com sucesso"); closeModal();
+            } catch (e) { 
+                console.error(e);
+                showToast("Erro ao excluir. Verifique sua conexão.", "error"); 
+                if(btn) { btn.disabled = false; btn.innerText = "Excluir"; }
+            }
+        }
+        async function deleteSei(id) {
+             try {
+                const btn = document.getElementById('btn-confirm-delete');
+                if(btn) { btn.disabled = true; btn.innerText = "Excluindo..."; }
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sei_processes', id));
+                showToast("Removido com sucesso"); closeModal();
+            } catch (e) { 
+                console.error(e);
+                showToast("Erro ao excluir. Verifique sua conexão.", "error"); 
+                if(btn) { btn.disabled = false; btn.innerText = "Excluir"; }
+            }
+        }
+        async function toggleTaskComplete(id, currentStatus) {
+            try {
+                const newStatus = !currentStatus ? 'done' : 'todo';
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tasks', id), {
+                    completed: !currentStatus,
+                    status: newStatus,
+                    completedAt: !currentStatus ? new Date().toISOString() : null
+                });
+            } catch (e) { showToast("Erro ao atualizar status", "error"); }
+        }
+
+        // ---------------- RENDERIZAÇÃO TAREFAS ----------------
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            const filtered = filterTasks();
+            const activeFilterBtnClass = "bg-brand-600 text-white";
+            const inactiveFilterBtnClass = "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50";
+
+            // Dashboard Widgets
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const urgent = tasks.filter(t => !t.completed && t.priority === 'high').length;
+
+            const urgentAlerts = tasks.filter(t => !t.completed && getDeadlineStatus(t) !== 'ok');
+            let alertsHtml = '';
+            
+            if (urgentAlerts.length > 0) {
+                const alertsList = urgentAlerts.map(t => {
+                    const status = getDeadlineStatus(t);
+                    const days = Math.abs(calculateDaysRemaining(t.dueDate));
+                    const msg = status === 'overdue' ? `Atrasado há ${days} dias` : `Vence em ${days} dias`;
+                    const colorClass = status === 'overdue' ? 'text-red-700 bg-red-100 border-red-200' : 'text-amber-700 bg-amber-100 border-amber-200';
+                    return `
+                        <div class="flex items-center justify-between p-2 rounded-lg border ${colorClass} mb-1 last:mb-0">
+                            <span class="text-xs font-bold truncate max-w-[70%]">⚠️ ${t.title}</span>
+                            <span class="text-[10px] uppercase font-black opacity-80">${msg}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                alertsHtml = `
+                    <div class="mb-6 animate-fade-in-up">
+                        <div class="bg-white dark:bg-slate-900 rounded-xl p-4 border border-red-200 dark:border-red-900/50 shadow-sm">
+                            <h4 class="text-sm font-bold text-red-600 mb-3 flex items-center gap-2">
+                                <span class="relative flex h-2 w-2">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                </span>
+                                Atenção: Demandas Críticas (${urgentAlerts.length})
+                            </h4>
+                            ${alertsList}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let html = `
+                ${alertsHtml}
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                     <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border-l-4 border-l-brand-500 shadow-sm">
+                        <p class="text-3xl font-black text-slate-800 dark:text-white mb-1">${total - completed}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Em Aberto</p>
+                    </div>
+                     <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border-l-4 border-l-red-500 shadow-sm">
+                        <p class="text-3xl font-black text-red-500 mb-1">${urgent}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Urgentes</p>
+                    </div>
+                     <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border-l-4 border-l-accent-500 shadow-sm">
+                        <p class="text-3xl font-black text-accent-500 mb-1">${completed}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Concluídos</p>
+                    </div>
+                     <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border-l-4 border-l-slate-300 dark:border-l-slate-600 shadow-sm">
+                        <p class="text-3xl font-black text-slate-600 dark:text-slate-400 mb-1">${total}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-2">
+                     <button onclick="window.setTaskFilter('active')" class="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${taskFilter === 'active' ? activeFilterBtnClass : inactiveFilterBtnClass}">Em Andamento</button>
+                     <button onclick="window.setTaskFilter('completed')" class="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${taskFilter === 'completed' ? 'bg-emerald-600 text-white' : inactiveFilterBtnClass}">Finalizados</button>
+                     <button onclick="window.setTaskFilter('high')" class="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${taskFilter === 'high' ? 'bg-red-500 text-white' : inactiveFilterBtnClass}">Urgentes</button>
+                </div>
+            `;
+
+            if (filtered.length === 0) {
+                html += renderEmptyTaskState();
+            } else {
+                html += `<div class="grid grid-cols-1 gap-3 animate-fade-in-up">`;
+                html += filtered.map(task => renderTaskCard(task)).join('');
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderTaskCard(task) {
+            const days = calculateDaysRemaining(task.dueDate);
+            const status = getDeadlineStatus(task);
+            let deadlineText = '';
+            let deadlineColorClass = 'text-slate-500';
+            
+            if (task.dueDate) {
+                if (status === 'overdue') {
+                    deadlineText = `Atrasado: ${Math.abs(days)} dias`;
+                    deadlineColorClass = 'text-red-600 font-bold';
+                } else if (status === 'soon') {
+                    deadlineText = days === 0 ? 'Vence: Hoje' : `Vence em: ${days} dias`;
+                    deadlineColorClass = 'text-amber-600 font-bold';
+                } else {
+                    deadlineText = `Prazo: ${days} dias`;
+                    deadlineColorClass = 'text-slate-500';
+                }
+            } else {
+                deadlineText = 'Sem prazo definido';
+            }
+
+            const priorityBadge = {
+                high: '<span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Alta Prioridade</span>',
+                medium: '<span class="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Média Prioridade</span>',
+                low: '<span class="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Baixa Prioridade</span>'
+            }[task.priority] || '';
+
+            const cardBg = status === 'overdue' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800';
+
+            return `
+                <div class="group relative ${cardBg} rounded-xl p-4 border shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-start gap-4">
+                        <label class="checkbox-wrapper relative flex items-center mt-1.5 cursor-pointer">
+                            <input type="checkbox" class="sr-only" ${task.completed ? 'checked' : ''} onchange="window.toggleTaskComplete('${task.id}', ${task.completed})">
+                            <div class="w-6 h-6 border-2 border-slate-300 dark:border-slate-600 rounded-full transition-all flex items-center justify-center hover:border-brand-400 bg-white dark:bg-slate-800">
+                                ${task.completed ? '<svg class="w-3 h-3 text-emerald-500" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                            </div>
+                        </label>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-base font-bold text-slate-900 dark:text-white truncate ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                    <button onclick="window.openTaskModal('${task.id}')" class="p-1.5 text-slate-400 hover:text-brand-600 transition-colors"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                    <button onclick="window.confirmTaskDelete('${task.id}')" class="p-1.5 text-slate-400 hover:text-red-500 transition-colors"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    ${task.responsible || 'Ñ atribuído'}
+                                </div>
+                                ${priorityBadge}
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs ${deadlineColorClass}">${deadlineText}</span>
+                            </div>
+                            ${task.description ? `<p class="text-xs text-slate-400 mt-1 line-clamp-1">${task.description}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterTasks() {
+            let filtered = tasks;
+            if (taskSearch) {
+                const q = taskSearch.toLowerCase();
+                filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || (t.responsible && t.responsible.toLowerCase().includes(q)));
+            }
+            if (taskFilter === 'active') filtered = filtered.filter(t => !t.completed);
+            else if (taskFilter === 'completed') filtered = filtered.filter(t => t.completed);
+            else if (taskFilter === 'high') filtered = filtered.filter(t => !t.completed && t.priority === 'high');
+
+            return filtered.sort((a, b) => {
+                 const statusA = getDeadlineStatus(a);
+                 const statusB = getDeadlineStatus(b);
+                 if (statusA === 'overdue' && statusB !== 'overdue') return -1;
+                 if (statusB === 'overdue' && statusA !== 'overdue') return 1;
+                 return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+        }
+
+        function renderEmptyTaskState() {
+             return `
+                <div class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <div class="w-16 h-16 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-3">
+                         <svg class="w-8 h-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    </div>
+                    <p class="text-slate-500 font-medium">Nenhum registro encontrado</p>
+                </div>
+            `;
+        }
+
+        // ---------------- RENDERIZAÇÃO SEI ----------------
+        function renderSeiList() {
+            const container = document.getElementById('sei-list-container');
+            const emptyState = document.getElementById('sei-empty-state');
+            const filtersContainer = document.getElementById('sei-filters-container');
+            const alertsContainer = document.getElementById('sei-alerts-container');
+            const q = document.getElementById('sei-search').value.toLowerCase();
+
+            const filters = [
+                { id: 'active', label: 'Em Andamento' },
+                { id: 'respondido', label: 'Respondidos' },
+                { id: 'arquivado', label: 'Arquivados' },
+                { id: 'all', label: 'Todos' }
+            ];
+
+            const activeBtnClass = "bg-slate-800 dark:bg-white text-white dark:text-slate-900";
+            const inactiveBtnClass = "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700";
+
+            filtersContainer.innerHTML = filters.map(f => `
+                <button onclick="window.setSeiFilter('${f.id}')" 
+                        class="whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${seiFilterStatus === f.id ? activeBtnClass : inactiveBtnClass}">
+                    ${f.label}
+                </button>
+            `).join('');
+
+            const filtered = seiData.filter(item => {
+                const matchesSearch = !q || 
+                    item.numero_sei.toLowerCase().includes(q) || 
+                    item.assunto.toLowerCase().includes(q) ||
+                    (item.responsavel && item.responsavel.toLowerCase().includes(q));
+
+                let matchesStatus = true;
+                if (seiFilterStatus === 'active') matchesStatus = item.status === 'pendente' || item.status === 'em_andamento';
+                else if (seiFilterStatus === 'respondido') matchesStatus = item.status === 'respondido';
+                else if (seiFilterStatus === 'arquivado') matchesStatus = item.status === 'arquivado';
+                else if (seiFilterStatus === 'all') matchesStatus = true;
+
+                return matchesSearch && matchesStatus;
+            });
+
+            const urgentSeis = seiData.filter(s => 
+                (s.status === 'pendente' || s.status === 'em_andamento') && 
+                getDeadlineStatus(s) !== 'ok'
+            );
+
+            if (urgentSeis.length > 0) {
+                const alertsList = urgentSeis.map(s => {
+                    const status = getDeadlineStatus(s);
+                    const days = Math.abs(calculateDaysRemaining(s.prazo_resposta));
+                    const msg = status === 'overdue' ? `Atrasado há ${days} dias` : `Vence em ${days} dias`;
+                    const colorClass = status === 'overdue' ? 'text-red-700 bg-red-100 border-red-200' : 'text-amber-700 bg-amber-100 border-amber-200';
+                    return `
+                        <div class="flex items-center justify-between p-2 rounded-lg border ${colorClass} mb-1 last:mb-0">
+                            <span class="text-xs font-bold truncate max-w-[70%]">⚠️ SEI: ${s.numero_sei}</span>
+                            <span class="text-[10px] uppercase font-black opacity-80">${msg}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                alertsContainer.innerHTML = `
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-4 border border-red-200 dark:border-red-900/50 shadow-sm animate-fade-in-up">
+                        <h4 class="text-sm font-bold text-red-600 mb-3 flex items-center gap-2">
+                            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>
+                            Processos Prioritários (${urgentSeis.length})
+                        </h4>
+                        ${alertsList}
+                    </div>
+                `;
+            } else {
+                alertsContainer.innerHTML = '';
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = filtered.map(sei => {
+                const deadlineDisplay = getSeiDeadlineDisplay(sei.prazo_resposta, sei.status);
+                const statusBadge = {
+                    'pendente': '<span class="status-pill bg-amber-100 text-amber-700">Pendente</span>',
+                    'em_andamento': '<span class="status-pill bg-blue-100 text-blue-700">Andamento</span>',
+                    'respondido': '<span class="status-pill bg-green-100 text-green-700">Respondido</span>',
+                    'arquivado': '<span class="status-pill bg-slate-100 text-slate-700 border border-slate-200">Arquivado</span>'
+                }[sei.status] || '<span class="status-pill bg-slate-100 text-slate-700">Desconhecido</span>';
+
+                const priorityBadge = {
+                    high: '<span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Alta</span>',
+                    medium: '<span class="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Média</span>',
+                    low: '<span class="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Baixa</span>'
+                }[sei.prioridade] || '<span class="bg-slate-400 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">-</span>';
+
+                const directionBadge = sei.direcao === 'recebido' 
+                    ? '<span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">Recebido</span>' 
+                    : '<span class="text-xs font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded">Emitido</span>';
+
+                let dataRecDisplay = '-';
+                if (sei.data_recebimento) {
+                    const [ano, mes, dia] = sei.data_recebimento.split('-');
+                    dataRecDisplay = `${dia}/${mes}/${ano}`;
+                }
+
+                return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-100 dark:border-slate-800">
+                    <td class="py-4 px-4 align-top">
+                        <span class="sei-mono text-sm text-brand-600 font-bold whitespace-nowrap">${sei.numero_sei}</span>
+                        <div class="text-[10px] text-slate-400 mt-1 whitespace-nowrap">${dataRecDisplay}</div>
+                    </td>
+                    <td class="py-4 px-4 align-top">
+                        <div class="text-slate-800 dark:text-slate-200 font-medium text-sm line-clamp-2" title="${sei.assunto}">${sei.assunto}</div>
+                        ${sei.observacoes ? `<div class="text-xs text-slate-500 mt-1 font-medium bg-slate-100 dark:bg-slate-800 p-1.5 rounded inline-block max-w-xs truncate" title="${sei.observacoes}">${sei.observacoes}</div>` : ''}
+                    </td>
+                    <td class="py-4 px-4 hidden md:table-cell align-top">${directionBadge}</td>
+                    <td class="py-4 px-4 hidden md:table-cell align-top">
+                        <div class="flex items-center gap-1">
+                            <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">${(sei.responsavel || '?').charAt(0)}</div>
+                            <span class="text-xs font-medium text-slate-600 dark:text-slate-400 truncate max-w-[100px]">${sei.responsavel || 'Ñ atribuído'}</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-4 text-center align-top">${priorityBadge}</td>
+                    <td class="py-4 px-4 align-top"><div class="text-xs font-semibold whitespace-nowrap">${deadlineDisplay}</div></td>
+                    <td class="py-4 px-4 align-top">${statusBadge}</td>
+                    <td class="py-4 px-4 text-right align-top">
+                        <div class="flex justify-end gap-2">
+                             <button onclick="window.createTaskFromSei('${sei.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-brand-600 transition-colors" title="Criar Tarefa"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
+                             <button onclick="window.openSeiModal('${sei.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-brand-600 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                             <button onclick="window.confirmSeiDelete('${sei.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-red-600 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function updateSeiStats() {
+            const total = seiData.length;
+            const pendentes = seiData.filter(s => s.status === 'pendente' || s.status === 'em_andamento').length;
+            const respondidos = seiData.filter(s => s.status === 'respondido').length;
+            const atrasados = seiData.filter(s => {
+                if(s.status === 'respondido' || s.status === 'arquivado' || !s.prazo_resposta) return false;
+                return calculateDaysRemaining(s.prazo_resposta) < 0;
+            }).length;
+            const arquivados = seiData.filter(s => s.status === 'arquivado').length;
+
+            setText('sei-stat-total', total);
+            setText('sei-stat-pendentes', pendentes);
+            setText('sei-stat-respondidos', respondidos);
+            setText('sei-stat-atrasados', atrasados);
+            setText('sei-stat-arquivados', arquivados);
+        }
+
+        // ---------------- MODALS ----------------
+        function openTaskModal(id = null, usePrefill = false) {
+            let task = { title: '', description: '', priority: 'medium', responsible: '', dueDate: '' };
+            if(id) task = tasks.find(t => t.id === id);
+            else if(usePrefill && window.prefillTask) {
+                task = window.prefillTask;
+                window.prefillTask = null;
+            }
+
+            const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-2xl md:rounded-2xl shadow-2xl animate-fade-in-up overflow-hidden max-h-[90vh] flex flex-col">
+                        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">${id ? 'Editar' : 'Nova'} Tarefa</h2>
+                            <button onclick="window.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">✕</button>
+                        </div>
+                        <form id="task-form" class="p-6 overflow-y-auto space-y-4">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Título</label><input id="m-title" required value="${task.title}" class="w-full text-lg font-bold bg-transparent border-b-2 border-slate-200 dark:border-slate-700 outline-none py-2"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-slate-500 uppercase">Responsável</label>
+                                <select id="m-responsible" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-3 text-sm outline-none">
+                                    <option value="">Selecione...</option>
+                                    ${['Rafael', 'Andreia', 'Andrade', 'Danielli', 'Saimon', 'Marcos'].map(n => `<option value="${n}" ${task.responsible === n ? 'selected' : ''}>${n}</option>`).join('')}
+                                </select></div>
+                                <div><label class="text-xs font-bold text-slate-500 uppercase">Prioridade</label>
+                                <select id="m-priority" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-3 text-sm outline-none">
+                                    <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Baixa</option>
+                                    <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Média</option>
+                                    <option value="high" ${task.priority === 'high' ? 'selected' : ''}>Alta</option>
+                                </select></div>
+                            </div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Descrição</label><textarea id="m-desc" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-sm outline-none resize-none">${task.description || ''}</textarea></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Prazo</label><input type="date" id="m-date" value="${task.dueDate}" class="w-full bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-3 text-sm outline-none"></div>
+                            <button type="submit" class="w-full py-3 bg-brand-600 text-white font-bold rounded-xl shadow-lg mt-2">Salvar</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.getElementById('task-form').onsubmit = (e) => {
+                e.preventDefault();
+                saveTask({
+                    title: document.getElementById('m-title').value,
+                    responsible: document.getElementById('m-responsible').value,
+                    description: document.getElementById('m-desc').value,
+                    dueDate: document.getElementById('m-date').value,
+                    priority: document.getElementById('m-priority').value
+                }, id);
+            }
+        };
+
+        function openSeiModal(id = null) {
+            const sei = id ? seiData.find(s => s.id === id) : { numero_sei: '', assunto: '', direcao: 'recebido', status: 'pendente', prazo_resposta: '', responsavel: '', data_recebimento: '', observacoes: '', prioridade: 'medium' };
+            const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-2xl md:rounded-2xl shadow-2xl animate-fade-in-up overflow-hidden max-h-[90vh] flex flex-col sei-area">
+                        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                            <h2 class="text-xl font-bold text-slate-900 dark:text-white">${id ? 'Editar SEI' : 'Novo SEI'}</h2>
+                            <button onclick="window.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200">✕</button>
+                        </div>
+                        <form id="sei-form" class="p-6 overflow-y-auto space-y-4">
+                            <div><label class="text-xs font-bold text-slate-500 mb-1">Nº SEI</label><input id="s-num" required value="${sei.numero_sei}" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-brand-500"></div>
+                            <div><label class="text-xs font-bold text-slate-500 mb-1">Assunto</label><input id="s-assunto" required value="${sei.assunto}" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-brand-500"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-slate-500 mb-1">Responsável</label><select id="s-responsavel" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none"><option value="">Selecione...</option>${['Rafael', 'Andrade', 'Andreia', 'Saimon', 'Danielli', 'Marcos'].map(n => `<option value="${n}" ${sei.responsavel === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+                                <div><label class="text-xs font-bold text-slate-500 mb-1">Prioridade</label><select id="s-prioridade" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none"><option value="low" ${sei.prioridade === 'low' ? 'selected' : ''}>Baixa</option><option value="medium" ${sei.prioridade === 'medium' ? 'selected' : ''}>Média</option><option value="high" ${sei.prioridade === 'high' ? 'selected' : ''}>Alta</option></select></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-slate-500 mb-1">Data Rec./Emissão</label><input type="date" id="s-data-recebimento" value="${sei.data_recebimento || ''}" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none"></div>
+                                <div><label class="text-xs font-bold text-slate-500 mb-1">Direção</label><select id="s-direcao" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none"><option value="recebido" ${sei.direcao === 'recebido' ? 'selected' : ''}>Recebido</option><option value="emitido" ${sei.direcao === 'emitido' ? 'selected' : ''}>Emitido</option></select></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-slate-500 mb-1">Status</label><select id="s-status" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none"><option value="pendente" ${sei.status === 'pendente' ? 'selected' : ''}>Pendente</option><option value="em_andamento" ${sei.status === 'em_andamento' ? 'selected' : ''}>Andamento</option><option value="respondido" ${sei.status === 'respondido' ? 'selected' : ''}>Respondido</option><option value="arquivado" ${sei.status === 'arquivado' ? 'selected' : ''}>Arquivado</option></select></div>
+                                <div><label class="text-xs font-bold text-slate-500 mb-1">Prazo</label><input type="date" id="s-prazo" value="${sei.prazo_resposta || ''}" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none"></div>
+                            </div>
+                            <div><label class="text-xs font-bold text-slate-500 mb-1">Observações</label><textarea id="s-observacoes" rows="2" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none resize-none">${sei.observacoes || ''}</textarea></div>
+                            <button type="submit" class="w-full py-3 mt-2 bg-slate-800 dark:bg-white dark:text-slate-900 text-white font-bold rounded-xl shadow-lg">Salvar</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.getElementById('sei-form').onsubmit = (e) => {
+                e.preventDefault();
+                saveSei({
+                    numero_sei: document.getElementById('s-num').value,
+                    assunto: document.getElementById('s-assunto').value,
+                    responsavel: document.getElementById('s-responsavel').value,
+                    prioridade: document.getElementById('s-prioridade').value,
+                    data_recebimento: document.getElementById('s-data-recebimento').value,
+                    direcao: document.getElementById('s-direcao').value,
+                    status: document.getElementById('s-status').value,
+                    observacoes: document.getElementById('s-observacoes').value,
+                    prazo_resposta: document.getElementById('s-prazo').value
+                }, id);
+            }
+        };
+
+        function confirmTaskDelete(id) {
+            const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl p-6 text-center shadow-2xl">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Excluir Demanda?</h3>
+                        <p class="text-slate-500 text-sm mb-6">Essa ação é irreversível.</p>
+                        <div class="flex gap-3">
+                            <button onclick="window.closeModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl">Cancelar</button>
+                            <button id="btn-confirm-delete" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl">Excluir</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Bind click event via JS to ensure correct scope access
+            document.getElementById('btn-confirm-delete').onclick = () => deleteTask(id);
+        };
+
+        function confirmSeiDelete(id) {
+             const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl p-6 text-center shadow-2xl">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Remover SEI?</h3>
+                        <p class="text-slate-500 text-sm mb-6">Confirma a exclusão deste registro?</p>
+                        <div class="flex gap-3">
+                            <button onclick="window.closeModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl">Cancelar</button>
+                            <button id="btn-confirm-delete" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl">Excluir</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Bind click event via JS to ensure correct scope access
+            document.getElementById('btn-confirm-delete').onclick = () => deleteSei(id);
+        }
+
+        // ---------------- HELPER UTILS ----------------
+        function calculateDaysRemaining(d){ if(!d) return 0; const diff = new Date(d+'T00:00:00') - new Date().setHours(0,0,0,0); return Math.ceil(diff/86400000); }
+        function getDeadlineStatus(i){ const d=i.dueDate||i.prazo_resposta; let done=false; if(i.dueDate) done=i.completed; else done=i.status==='respondido'||i.status==='arquivado'; if(!d||done) return 'ok'; const diff=calculateDaysRemaining(d); if(diff<0) return 'overdue'; if(diff<=5) return 'soon'; return 'ok'; }
+        function showToast(m,t='success'){ const c=document.getElementById('toast-container'); const e=document.createElement('div'); e.className=`p-4 rounded-xl shadow-xl text-sm font-bold text-white flex items-center gap-3 animate-slide-in-right backdrop-blur-md ${t==='success'?'bg-slate-900/90 dark:bg-white/90 dark:text-slate-900':'bg-red-500/90'}`; e.innerHTML=`<span>${t==='success'?'✓':'⚠️'}</span> ${m}`; c.appendChild(e); setTimeout(()=>{e.style.opacity='0';e.style.transform='translateY(10px)';setTimeout(()=>e.remove(),300)},3000); }
+        function getSeiDeadlineDisplay(prazo, status) {
+            if (status === 'respondido') return '<span class="text-green-600 font-semibold">✓ Concluído</span>';
+            if (status === 'arquivado') return '<span class="text-slate-400">Arquivado</span>';
+            if (!prazo) return '<span class="text-slate-400">Sem prazo</span>';
+            const days = calculateDaysRemaining(prazo);
+            if (days < 0) return `<span class="text-red-600 font-semibold">⚠️ ${Math.abs(days)}d atraso</span>`;
+            if (days <= 3) return `<span class="text-amber-600 font-semibold">⏰ ${days}d restantes</span>`;
+            return `<span class="text-slate-500 font-medium">${days}d restantes</span>`;
+        }
+
+        // ---------------- CONTROLE GERAL DA UI ----------------
+        function switchTab(tab) {
+            currentTab = tab;
+            ['dashboard','calendar','tasks','sei','kanban', 'admin'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if(el) {
+                    if(t === tab) el.classList.remove('hidden-tab');
+                    else el.classList.add('hidden-tab');
+                }
+                const nav = document.getElementById(`nav-${t}`);
+                if(nav) {
+                    if(t === tab) nav.className = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold bg-brand-50 text-brand-600 dark:bg-slate-800 dark:text-brand-400 ring-1 ring-inset ring-brand-100 dark:ring-slate-700";
+                    else nav.className = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800";
+                }
+            });
+            if(tab === 'dashboard') renderDashboard();
+            if(tab === 'calendar') renderCalendar();
+            if(tab === 'kanban') renderKanban();
+            if(tab === 'admin') renderAdmin();
+        };
+
+        // --- BACKUP RESTORATION ---
+        function openBackupModal() {
+            const backupData = {
+                version: 2, // Upgraded version
+                exportedAt: new Date().toISOString(),
+                tasks: tasks,
+                sei: seiData,
+                events: calendarData
+            };
+            const jsonString = JSON.stringify(backupData, null, 2);
+
+            const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-2xl animate-fade-in-up flex flex-col max-h-[90vh]">
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">Backup e Dados</h2>
+                            <button onclick="window.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200">✕</button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Exportar Dados (JSON)</label>
+                                <div class="relative">
+                                    <textarea readonly id="export-area" class="w-full h-32 bg-slate-100 dark:bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-600 dark:text-slate-400 border-0 outline-none resize-none">${jsonString}</textarea>
+                                    <div class="absolute top-2 right-2 flex gap-2">
+                                        <button onclick="window.copyToClipboard()" class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm text-slate-500 hover:text-brand-600 transition-colors" title="Copiar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                                        <button onclick="window.downloadBackup()" class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm text-slate-500 hover:text-brand-600 transition-colors" title="Baixar .json"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400">Contém ${tasks.length} tarefas, ${seiData.length} processos SEI e ${calendarData.length} eventos.</p>
+                            </div>
+                            <hr class="border-slate-100 dark:border-slate-800">
+                            <div class="space-y-3">
+                                <label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Importar Backup</label>
+                                <textarea id="import-area" class="w-full h-32 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-xl font-mono text-xs outline-none focus:ring-2 focus:ring-brand-500 resize-none" placeholder="Cole o código JSON aqui..."></textarea>
+                                <button id="btn-process-import" onclick="window.processImport()" class="w-full py-3 bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition-all">Processar Importação</button>
+                                <p class="text-xs text-amber-600 dark:text-amber-500">Atenção: A importação criará novos registros no banco de dados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyToClipboard() {
+            const el = document.getElementById('export-area');
+            el.select();
+            document.execCommand('copy');
+            showToast("Copiado para área de transferência!");
+        }
+
+        function downloadBackup() {
+            const el = document.getElementById('export-area');
+            const blob = new Blob([el.value], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "backup_corrsaa_" + new Date().toISOString().split('T')[0] + ".json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function processImport() {
+            const btn = document.querySelector('#btn-process-import');
+            if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
+            
+            try {
+                const jsonText = document.getElementById('import-area').value;
+                if(!jsonText) {
+                    if(btn) { btn.disabled = false; btn.innerText = "Processar Importação"; }
+                    return showToast("Cole o JSON primeiro!", "error");
+                }
+
+                const data = JSON.parse(jsonText);
+                let countTasks = 0;
+                let countSei = 0;
+                let countEvents = 0;
+
+                // Import Tasks
+                if(data.tasks && Array.isArray(data.tasks)) {
+                    const tasksRef = collection(db, 'artifacts', appId, 'public', 'data', 'tasks');
+                    for(const t of data.tasks) {
+                        if(!t || typeof t !== 'object') continue;
+                        const { id, ...taskData } = t; 
+                        await addDoc(tasksRef, taskData);
+                        countTasks++;
+                    }
+                }
+
+                // Import SEI
+                if(data.sei && Array.isArray(data.sei)) {
+                     const seiRef = collection(db, 'artifacts', appId, 'public', 'data', 'sei_processes');
+                     for(const s of data.sei) {
+                          if(!s || typeof s !== 'object') continue;
+                          const { id, ...seiData } = s; 
+                          await addDoc(seiRef, seiData);
+                          countSei++;
+                     }
+                }
+
+                // Import Events
+                if(data.events && Array.isArray(data.events)) {
+                     const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+                     for(const e of data.events) {
+                          if(!e || typeof e !== 'object') continue;
+                          const { id, ...eventData } = e; 
+                          await addDoc(eventsRef, eventData);
+                          countEvents++;
+                     }
+                }
+
+                showToast(`Importado: ${countTasks} tarefas, ${countSei} SEIs, ${countEvents} eventos.`);
+                closeModal();
+            } catch(e) { 
+                console.error(e); 
+                showToast("Erro ao importar. Verifique o formato do JSON.", "error"); 
+                if(btn) { btn.disabled = false; btn.innerText = "Processar Importação"; }
+            }
+        }
+        
+        function setTaskFilter(f) { taskFilter=f; renderTasks(); };
+        function setTaskSearch(s) { taskSearch=s; renderTasks(); };
+        function setSeiFilter(f) { seiFilterStatus=f; renderSeiList(); };
+        function setSeiSearch(s) { seiSearch=s; renderSeiList(); }; 
+        function toggleTheme() { isDarkMode=!isDarkMode; localStorage.setItem('theme', isDarkMode?'dark':'light'); document.documentElement.classList.toggle('dark'); updateThemeIcon(); };
+        function closeModal() { document.getElementById('modal-container').innerHTML = ''; };
+        
+        // Expose functions to window
+        Object.assign(window, { 
+            deleteTask, deleteOldItems, toggleTaskComplete, deleteSei, 
+            switchTab, openTaskModal, openSeiModal, confirmTaskDelete, confirmSeiDelete, 
+            setTaskFilter, setTaskSearch, setSeiFilter, setSeiSearch, 
+            toggleTheme, closeModal, openBackupModal, copyToClipboard, downloadBackup, processImport, 
+            requestNotificationPermission, allowDrop, drag, drop, createTaskFromSei,
+            // Calendar specific
+            changeMonth, goToToday, openEventModal, saveEvent, deleteEvent
+        });
+
+        initAuth();
+    </script>
+</body>
+</html>
