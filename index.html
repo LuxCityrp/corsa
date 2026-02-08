@@ -66,7 +66,7 @@
             border-color: #10b981;
         }
 
-        /* --- ESTILOS ESPECÍFICOS DO SEI (Adaptados para o Tema Dark Unificado) --- */
+        /* --- ESTILOS ESPECÍFICOS DO SEI --- */
         .sei-area { font-family: 'Space Grotesk', sans-serif; }
         .sei-mono { font-family: 'JetBrains Mono', monospace; }
         
@@ -100,6 +100,7 @@
         
         /* Utilitários de visibilidade */
         .hidden-tab { display: none !important; }
+        .hidden-elm { display: none !important; }
 
         /* Kanban Styles */
         .kanban-column {
@@ -131,34 +132,70 @@
         .dark .calendar-cell:hover {
             background-color: rgba(30, 41, 59, 0.8);
         }
-        .today-highlight {
-            background-color: #0ea5e9;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* CSS .today-highlight removido a pedido */
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100;
+            background-image: radial-gradient(circle at center, #f8fafc 0%, #cbd5e1 100%);
         }
+        .dark #login-screen {
+            background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+        }
+        #app { display: none; } /* Escondido até login */
     </style>
 </head>
 <body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500 overflow-hidden">
     
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-slate-700 p-8 animate-fade-in-up">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-500/30">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">CORRSAA</h1>
+                <p class="text-sm text-slate-500 font-medium">Sistema Integrado Alto Acre</p>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Usuário</label>
+                    <input type="text" id="login-user" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium" placeholder="Digite seu usuário...">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Senha</label>
+                    <input type="password" id="login-pass" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium" placeholder="••••••••">
+                </div>
+                
+                <div class="flex items-center justify-between mt-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="login-remember" class="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                        <span class="text-xs text-slate-500 font-medium select-none">Manter conectado</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-lg hover:shadow-brand-500/25 transition-all transform active:scale-95 flex justify-center items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    Acessar Sistema
+                </button>
+            </form>
+            <p class="text-center text-[10px] text-slate-400 mt-6">Acesso restrito à equipe de coordenação.</p>
+        </div>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL -->
     <div id="app" class="h-full flex flex-col md:flex-row">
-        <!-- Loader Inicial -->
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-slate-950 transition-opacity duration-500" id="loader">
+        <!-- Loader Interno (renomeado para evitar conflito) -->
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-slate-950 transition-opacity duration-500" id="app-loader">
             <div class="flex flex-col items-center gap-4">
                 <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-                <div class="flex items-center gap-2 text-brand-600 font-bold tracking-widest">
-                    CORRSAA
-                </div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- MENU LATERAL UNIFICADO (SIDEBAR)           -->
-        <!-- ========================================== -->
+        <!-- MENU LATERAL -->
         <aside class="hidden md:flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 shrink-0">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-10">
@@ -169,6 +206,13 @@
                         <h1 class="font-bold text-lg tracking-tight leading-none text-slate-800 dark:text-slate-100">CORRSAA</h1>
                         <p class="text-[10px] font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide mt-1">Alto Acre</p>
                     </div>
+                </div>
+
+                <!-- Info Usuário Logado -->
+                <div class="mb-6 px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Logado como</p>
+                    <p class="text-sm font-bold text-brand-600 dark:text-white truncate" id="sidebar-username">Usuário</p>
+                    <p class="text-[10px] text-slate-500 truncate" id="sidebar-role">Cargo</p>
                 </div>
 
                 <div class="space-y-1">
@@ -196,18 +240,21 @@
                         Gestão SEI
                     </button>
                     
-                    <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Sistema</p>
-                    <button onclick="window.switchTab('admin')" id="nav-admin" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6a1 1 0 0 0-1 1v9a1 1 0 0 0 2 0V7a1 1 0 0 0-1-1z"/></svg>
-                        Administração
-                    </button>
+                    <!-- Botão Admin (Visível apenas para DEV via JS) -->
+                    <div id="admin-menu-item" class="hidden-elm">
+                        <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Sistema</p>
+                        <button onclick="window.switchTab('admin')" id="nav-admin" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6a1 1 0 0 0-1 1v9a1 1 0 0 0 2 0V7a1 1 0 0 0-1-1z"/></svg>
+                            Administração
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div class="mt-auto p-6 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                <button onclick="window.requestNotificationPermission()" class="w-full py-2 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors" title="Ativar Notificações">
-                    <svg class="icon w-4 h-4" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    Alertas
+                <button onclick="window.logout()" class="w-full py-2 flex items-center justify-center gap-2 text-sm font-medium text-red-500 hover:text-red-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Sair
                 </button>
                 <button onclick="window.openBackupModal()" class="w-full py-2 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
                     <svg class="icon w-4 h-4" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
@@ -217,182 +264,101 @@
                     <span id="theme-icon-container"></span>
                     <span id="theme-text">Alterar Tema</span>
                 </button>
-
-                <!-- INDICADOR DE STATUS DO BANCO DE DADOS -->
-                <div class="pt-4 flex items-center justify-center gap-2 opacity-0 transition-opacity duration-1000 delay-500" id="db-status-indicator">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    <span class="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Banco de Dados Conectado</span>
-                </div>
-                
-                <!-- CREDITOS -->
                 <div class="pt-2 text-center">
                     <p class="text-[9px] font-medium text-slate-400 dark:text-slate-600">Desenvolvido por:<br>Albuquerque Sistemas</p>
                 </div>
             </div>
         </aside>
 
-        <!-- Menu Mobile (Corrigido para incluir todos os itens) -->
+        <!-- Menu Mobile -->
         <div class="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0 overflow-x-auto">
             <div class="flex items-center gap-2 shrink-0 mr-4">
                  <svg class="w-6 h-6 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                  <span class="font-bold text-lg text-slate-800 dark:text-white">CORRSAA</span>
             </div>
             <div class="flex gap-2">
-                <button onclick="window.switchTab('dashboard')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Dashboard"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
-                <button onclick="window.switchTab('calendar')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Agenda"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
-                <button onclick="window.switchTab('tasks')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Tarefas"><svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
-                <button onclick="window.switchTab('kanban')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Kanban"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM9 3v18M15 3v18"/></svg></button>
-                <button onclick="window.switchTab('sei')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="SEI"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
-                <button onclick="window.switchTab('admin')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="Admin"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+                <button onclick="window.logout()" class="p-2 rounded-lg bg-red-50 text-red-500" title="Sair"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+                <button onclick="window.switchTab('dashboard')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
+                <button onclick="window.switchTab('calendar')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
+                <button onclick="window.switchTab('tasks')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
+                <button onclick="window.switchTab('kanban')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM9 3v18M15 3v18"/></svg></button>
+                <button onclick="window.switchTab('sei')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
+                <button onclick="window.switchTab('admin')" id="mobile-nav-admin" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hidden-elm"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
             </div>
         </div>
 
         <!-- AREA DE CONTEUDO PRINCIPAL -->
         <main class="flex-1 overflow-hidden relative bg-slate-50/50 dark:bg-slate-950">
-            
             <!-- ABA 0: DASHBOARD -->
             <div id="tab-dashboard" class="h-full flex flex-col overflow-y-auto p-6 md:p-8">
                 <header class="mb-8">
                     <h2 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-1" id="dash-welcome">Bom dia, Usuário</h2>
                     <p class="text-slate-500 dark:text-slate-400">Aqui está o resumo das suas atividades hoje.</p>
                 </header>
-
                 <!-- Resumo Geral -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('tasks')">
-                        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
-                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-total-tasks">0</p>
-                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Tarefas Pendentes</p>
-                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center"><svg class="icon w-6 h-6" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                        <div><p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-total-tasks">0</p><p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Tarefas Pendentes</p></div>
                     </div>
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('tasks')">
-                        <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 flex items-center justify-center">
-                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-urgent-tasks">0</p>
-                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Tarefas Urgentes</p>
-                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 flex items-center justify-center"><svg class="icon w-6 h-6" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+                        <div><p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-urgent-tasks">0</p><p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Tarefas Urgentes</p></div>
                     </div>
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('sei')">
-                        <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center">
-                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-total-sei">0</p>
-                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Processos Ativos</p>
-                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><svg class="icon w-6 h-6" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                        <div><p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-total-sei">0</p><p class="text-xs text-slate-500 uppercase font-bold tracking-wide">Processos Ativos</p></div>
                     </div>
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all" onclick="window.switchTab('sei')">
-                        <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center">
-                            <svg class="icon w-6 h-6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-expiring-sei">0</p>
-                            <p class="text-xs text-slate-500 uppercase font-bold tracking-wide">SEI Vencendo</p>
-                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center"><svg class="icon w-6 h-6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+                        <div><p class="text-3xl font-bold text-slate-800 dark:text-white" id="dash-expiring-sei">0</p><p class="text-xs text-slate-500 uppercase font-bold tracking-wide">SEI Vencendo</p></div>
                     </div>
                 </div>
-
-                <!-- Listas Rápidas (3 COLUNAS) -->
+                <!-- Listas -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- 1. Tarefas Prioritárias -->
                     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col h-full">
-                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500"></span> Tarefas Críticas
-                        </h3>
-                        <div class="space-y-3 flex-1" id="dash-tasks-list">
-                            <!-- JS -->
-                        </div>
+                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span> Tarefas Críticas</h3>
+                        <div class="space-y-3 flex-1" id="dash-tasks-list"></div>
                     </div>
-
-                    <!-- 2. SEI Próximos -->
                     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col h-full">
-                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Prazos SEI
-                        </h3>
-                        <div class="space-y-3 flex-1" id="dash-sei-list">
-                            <!-- JS -->
-                        </div>
+                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Prazos SEI</h3>
+                        <div class="space-y-3 flex-1" id="dash-sei-list"></div>
                     </div>
-
-                    <!-- 3. Eventos Agendados -->
                     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 flex flex-col h-full">
-                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-brand-500"></span> Eventos da Semana
-                        </h3>
-                        <div class="space-y-3 flex-1" id="dash-events-list">
-                            <!-- JS will populate this -->
-                            <p class="text-sm text-slate-400">Carregando...</p>
-                        </div>
+                        <h3 class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-500"></span> Eventos da Semana</h3>
+                        <div class="space-y-3 flex-1" id="dash-events-list"><p class="text-sm text-slate-400">Carregando...</p></div>
                         <button onclick="window.switchTab('calendar')" class="mt-4 w-full py-2 text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/10 rounded-lg hover:bg-brand-100 dark:hover:bg-brand-900/20 transition-colors">Ver Agenda Completa</button>
                     </div>
-
                 </div>
             </div>
 
-            <!-- ABA 1: AGENDA (CALENDAR) -->
+            <!-- OUTRAS ABAS (CALENDAR, TASKS, KANBAN, SEI - MANTIDAS IGUAIS) -->
+            <!-- ABA 1: CALENDAR -->
             <div id="tab-calendar" class="h-full flex flex-col overflow-hidden hidden-tab bg-white dark:bg-slate-950">
                 <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 border-b border-slate-200 dark:border-slate-800">
                     <div class="flex items-center gap-4">
-                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight" id="calendar-title">Outubro 2023</h2>
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight" id="calendar-title">Mês Ano</h2>
                         <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-                            <button onclick="window.changeMonth(-1)" class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm transition-all"><svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                            <button onclick="window.changeMonth(1)" class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm transition-all"><svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+                            <button onclick="window.changeMonth(-1)" class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm"><svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                            <button onclick="window.changeMonth(1)" class="p-1 hover:bg-white dark:hover:bg-slate-700 rounded shadow-sm"><svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                         </div>
-                        <button onclick="window.goToToday()" class="px-3 py-1.5 text-sm font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">Hoje</button>
+                        <button onclick="window.goToToday()" class="px-3 py-1.5 text-sm font-semibold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">Hoje</button>
                     </div>
-                    <button onclick="window.openEventModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
-                        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> <span class="hidden md:inline">Evento</span>
-                    </button>
+                    <button onclick="window.openEventModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg flex items-center gap-2"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Evento</button>
                 </header>
-                
                 <div class="flex-1 flex flex-col overflow-hidden">
-                    <!-- Weekday Headers (Com min-width para mobile) -->
-                    <div class="overflow-x-auto">
-                        <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 min-w-[700px]">
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Dom</div>
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Seg</div>
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Ter</div>
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Qua</div>
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Qui</div>
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Sex</div>
-                            <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Sáb</div>
-                        </div>
-                    </div>
-                    <!-- Calendar Grid (Com min-width para mobile) -->
-                    <div class="flex-1 overflow-auto custom-scrollbar bg-slate-200 dark:bg-slate-800">
-                        <div id="calendar-grid" class="calendar-grid h-full w-full min-w-[700px]">
-                            <!-- JS generated cells -->
-                        </div>
-                    </div>
+                    <div class="overflow-x-auto"><div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50 min-w-[700px]"><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Dom</div><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Seg</div><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Ter</div><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Qua</div><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Qui</div><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Sex</div><div class="py-3 text-center text-xs font-bold text-slate-500 uppercase">Sáb</div></div></div>
+                    <div class="flex-1 overflow-auto custom-scrollbar bg-slate-200 dark:bg-slate-800"><div id="calendar-grid" class="calendar-grid h-full w-full min-w-[700px]"></div></div>
                 </div>
             </div>
 
-            <!-- ABA 2: GESTÃO DE TAREFAS -->
+            <!-- ABA 2: TASKS -->
             <div id="tab-tasks" class="h-full flex flex-col overflow-hidden hidden-tab">
                 <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5" id="task-date-display"></p>
-                        <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Painel de Demandas</h2>
-                    </div>
+                    <div><p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5" id="task-date-display"></p><h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Painel de Demandas</h2></div>
                     <div class="flex items-center gap-3">
-                        <div class="relative group w-full md:w-auto">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            </div>
-                            <input type="text" placeholder="Buscar protocolo..." oninput="window.setTaskSearch(this.value)" class="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none w-full md:w-64">
-                        </div>
-                        <button onclick="window.openTaskModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
-                            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> <span class="hidden md:inline">Nova</span>
-                        </button>
+                        <div class="relative group w-full md:w-auto"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div><input type="text" placeholder="Buscar protocolo..." oninput="window.setTaskSearch(this.value)" class="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none w-full md:w-64"></div>
+                        <button onclick="window.openTaskModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg flex items-center gap-2"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Nova</button>
                     </div>
                 </header>
                 <div class="flex-1 overflow-y-auto p-6 scrollbar-thin pb-20" id="tasks-container"></div>
@@ -401,79 +367,31 @@
             <!-- ABA 3: KANBAN -->
             <div id="tab-kanban" class="h-full flex flex-col overflow-hidden hidden-tab bg-slate-100 dark:bg-slate-900">
                 <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 bg-white/80 dark:bg-slate-900/80">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Quadro Kanban</h2>
-                        <p class="text-xs text-slate-500">Arraste e solte para mover as tarefas</p>
-                    </div>
-                    <button onclick="window.openTaskModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
-                        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> <span class="hidden md:inline">Nova Tarefa</span>
-                    </button>
+                    <div><h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Quadro Kanban</h2><p class="text-xs text-slate-500">Arraste e solte</p></div>
+                    <button onclick="window.openTaskModal()" class="py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold shadow-lg flex items-center gap-2"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Nova Tarefa</button>
                 </header>
                 <div class="flex-1 overflow-x-auto overflow-y-hidden p-6">
                     <div class="flex h-full gap-6 min-w-[800px]">
-                        <!-- Coluna: A Fazer -->
-                        <div class="flex-1 flex flex-col min-w-[280px] bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl p-4">
-                            <h3 class="font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center justify-between">
-                                A Fazer <span class="bg-slate-300 dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs" id="count-todo">0</span>
-                            </h3>
-                            <div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-todo" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)">
-                                <!-- Items -->
-                            </div>
-                        </div>
-                        <!-- Coluna: Em Andamento -->
-                        <div class="flex-1 flex flex-col min-w-[280px] bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-4 border border-blue-100 dark:border-blue-900/20">
-                            <h3 class="font-bold text-blue-700 dark:text-blue-300 mb-4 flex items-center justify-between">
-                                Em Andamento <span class="bg-blue-200 dark:bg-blue-800 px-2 py-0.5 rounded-full text-xs" id="count-doing">0</span>
-                            </h3>
-                            <div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-doing" ondrop="drop(event, 'doing')" ondragover="allowDrop(event)">
-                                <!-- Items -->
-                            </div>
-                        </div>
-                        <!-- Coluna: Concluído -->
-                        <div class="flex-1 flex flex-col min-w-[280px] bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-4 border border-green-100 dark:border-green-900/20">
-                            <h3 class="font-bold text-green-700 dark:text-green-300 mb-4 flex items-center justify-between">
-                                Concluído <span class="bg-green-200 dark:bg-green-800 px-2 py-0.5 rounded-full text-xs" id="count-done">0</span>
-                            </h3>
-                            <div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-done" ondrop="drop(event, 'done')" ondragover="allowDrop(event)">
-                                <!-- Items -->
-                            </div>
-                        </div>
+                        <div class="flex-1 flex flex-col min-w-[280px] bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl p-4"><h3 class="font-bold text-slate-700 dark:text-slate-300 mb-4 flex justify-between">A Fazer <span class="bg-slate-300 dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs" id="count-todo">0</span></h3><div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-todo" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)"></div></div>
+                        <div class="flex-1 flex flex-col min-w-[280px] bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-4 border border-blue-100"><h3 class="font-bold text-blue-700 dark:text-blue-300 mb-4 flex justify-between">Em Andamento <span class="bg-blue-200 dark:bg-blue-800 px-2 py-0.5 rounded-full text-xs" id="count-doing">0</span></h3><div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-doing" ondrop="drop(event, 'doing')" ondragover="allowDrop(event)"></div></div>
+                        <div class="flex-1 flex flex-col min-w-[280px] bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-4 border border-green-100"><h3 class="font-bold text-green-700 dark:text-green-300 mb-4 flex justify-between">Concluído <span class="bg-green-200 dark:bg-green-800 px-2 py-0.5 rounded-full text-xs" id="count-done">0</span></h3><div class="flex-1 overflow-y-auto space-y-3 kanban-column custom-scrollbar" id="col-done" ondrop="drop(event, 'done')" ondragover="allowDrop(event)"></div></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA 4: GESTÃO SEI -->
+            <!-- ABA 4: SEI -->
             <div id="tab-sei" class="h-full flex flex-col overflow-hidden hidden-tab sei-area">
                 <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-                    <div>
-                        <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-amber-600 dark:from-white dark:to-slate-300">
-                            Sistema Eletrônico de Informações - SEI
-                        </h2>
-                        <p class="text-xs text-slate-500 font-light">Processos Eletrônicos</p>
-                    </div>
-                    <div class="flex gap-3">
-                         <button onclick="window.openSeiModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 dark:bg-white dark:text-slate-900 text-white rounded-xl font-semibold shadow-lg transition-all flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg> 
-                            Novo SEI 
-                        </button>
-                    </div>
+                    <div><h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-amber-600 dark:from-white dark:to-slate-300">Sistema Eletrônico de Informações - SEI</h2><p class="text-xs text-slate-500 font-light">Processos Eletrônicos</p></div>
+                    <div class="flex gap-3"><button onclick="window.openSeiModal()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 dark:bg-white dark:text-slate-900 text-white rounded-xl font-semibold shadow-lg transition-all flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg> Novo SEI</button></div>
                 </header>
                 <div class="flex-1 overflow-y-auto p-6 scrollbar-thin pb-20">
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                        <!-- Stats SEI -->
-                        <div class="card-glass rounded-2xl p-4 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
-                            <div><p class="text-2xl font-bold text-slate-900 dark:text-white" id="sei-stat-total">0</p><p class="text-[10px] text-slate-500 uppercase tracking-wide">Total</p></div>
-                        </div>
-                        <!-- ... (Outros stats mantidos via JS) ... -->
+                        <div class="card-glass rounded-2xl p-4 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><div><p class="text-2xl font-bold text-slate-900 dark:text-white" id="sei-stat-total">0</p><p class="text-[10px] text-slate-500 uppercase tracking-wide">Total</p></div></div>
                     </div>
-                    <!-- Filtros e Alertas -->
                     <div class="card-glass rounded-2xl p-4 mb-6">
                         <div class="flex flex-col md:flex-row gap-4 items-center">
-                            <div class="flex-1 relative w-full">
-                                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                                <input type="text" id="sei-search" oninput="window.setSeiSearch(this.value)" placeholder="Buscar nº sei, assunto..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none">
-                            </div>
+                            <div class="flex-1 relative w-full"><svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg><input type="text" id="sei-search" oninput="window.setSeiSearch(this.value)" placeholder="Buscar nº sei, assunto..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none"></div>
                             <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 custom-scrollbar" id="sei-filters-container"></div>
                         </div>
                     </div>
@@ -481,36 +399,66 @@
                     <div class="card-glass rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
                         <div class="overflow-x-auto">
                             <table class="w-full">
-                                <thead class="bg-slate-50 dark:bg-slate-800/50">
-                                    <tr>
-                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Nº SEI</th>
-                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider min-w-[200px]">Assunto</th>
-                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Direção</th>
-                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Responsável</th>
-                                        <th class="text-center py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Prioridade</th>
-                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Prazo</th>
-                                        <th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                        <th class="text-right py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
+                                <thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase w-32">Nº SEI</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase min-w-[200px]">Assunto</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase hidden md:table-cell">Direção</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase hidden md:table-cell">Responsável</th><th class="text-center py-4 px-4 text-xs font-bold text-slate-500 uppercase">Prioridade</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase">Prazo</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase">Status</th><th class="text-right py-4 px-4 text-xs font-bold text-slate-500 uppercase">Ações</th></tr></thead>
                                 <tbody id="sei-list-container" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
                             </table>
                         </div>
-                        <div id="sei-empty-state" class="hidden py-16 text-center">
-                            <p class="text-slate-500">Nenhum processo encontrado.</p>
-                        </div>
+                        <div id="sei-empty-state" class="hidden py-16 text-center"><p class="text-slate-500">Nenhum processo encontrado.</p></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA 5: ADMINISTRAÇÃO -->
+            <!-- ABA 5: ADMINISTRAÇÃO (ACESSO RESTRITO VISUALMENTE) -->
             <div id="tab-admin" class="h-full flex flex-col overflow-y-auto hidden-tab p-6 md:p-8">
                 <header class="mb-8">
                     <h2 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-1">Administração do Sistema</h2>
-                    <p class="text-slate-500 dark:text-slate-400">Ferramentas de limpeza e manutenção de dados.</p>
+                    <p class="text-slate-500 dark:text-slate-400">Painel de controle e ferramentas avançadas.</p>
                 </header>
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-8">
+                <!-- PAINEL DEV: GESTÃO DE USUÁRIOS -->
+                <div id="admin-user-panel" class="mb-8 bg-slate-900 text-white rounded-2xl shadow-lg p-8 border border-slate-700 hidden-elm">
+                    <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-6">
+                        <div class="p-3 bg-brand-500/20 text-brand-400 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Gestão de Usuários (DEV)</h3>
+                            <p class="text-sm text-slate-400">Criar e remover credenciais de acesso.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 mb-6">
+                        <input type="text" id="new-user-name" placeholder="Usuário (Login)" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                        <input type="text" id="new-user-pass" placeholder="Senha" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                        <select id="new-user-role" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                            <option value="Coordenadora Regional">Coordenadora Regional</option>
+                            <option value="Gerente de Assistência Regional">Gerente Assistência Reg.</option>
+                            <option value="Gerente Administrativo">Gerente Administrativo</option>
+                            <option value="Administrativo">Administrativo</option>
+                            <option value="Gerente de Frotas">Gerente de Frotas</option>
+                            <option value="Coordenador Regional CEREST">Coord. Regional CEREST</option>
+                            <option value="Representante DAPS e DVS">Representante DAPS e DVS</option>
+                        </select>
+                        <button onclick="window.createUser()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-6 py-3 rounded-xl transition-colors">Criar</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-400">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3 rounded-l-lg">Usuário</th>
+                                    <th class="px-4 py-3">Cargo</th>
+                                    <th class="px-4 py-3">Senha</th>
+                                    <th class="px-4 py-3 rounded-r-lg text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-list">
+                                <!-- Users list here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FERRAMENTAS DE LIMPEZA (DEV ONLY) -->
+                <div id="admin-cleanup-panel" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-8 hidden-elm">
                     <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
                         <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600 dark:text-red-400">
                              <svg class="icon w-6 h-6" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -521,7 +469,6 @@
                         </div>
                     </div>
 
-                    <!-- Configuração de Dias -->
                     <div class="mb-8 max-w-xs">
                         <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">Critério de Antiguidade (Dias)</label>
                         <div class="flex items-center gap-2">
@@ -532,36 +479,16 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Card Tarefas -->
                         <div class="bg-slate-50 dark:bg-slate-950 rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center">
-                            <div class="mb-4">
-                                <span class="text-4xl font-black text-slate-700 dark:text-slate-300" id="admin-count-tasks">0</span>
-                                <p class="text-xs font-bold uppercase text-slate-400 mt-1">Tarefas Antigas</p>
-                            </div>
+                            <div class="mb-4"><span class="text-4xl font-black text-slate-700 dark:text-slate-300" id="admin-count-tasks">0</span><p class="text-xs font-bold uppercase text-slate-400 mt-1">Tarefas Antigas</p></div>
                             <p class="text-sm text-slate-500 mb-6">Tarefas concluídas a mais de <span class="admin-days-display">30</span> dias.</p>
-                            <button onclick="window.deleteOldItems('tasks')" class="w-full py-3 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold rounded-xl transition-all shadow-sm">
-                                Excluir Tarefas
-                            </button>
+                            <button onclick="window.deleteOldItems('tasks')" class="w-full py-3 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold rounded-xl transition-all shadow-sm">Excluir Tarefas</button>
                         </div>
-
-                        <!-- Card SEI -->
                         <div class="bg-slate-50 dark:bg-slate-950 rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center">
-                            <div class="mb-4">
-                                <span class="text-4xl font-black text-slate-700 dark:text-slate-300" id="admin-count-sei">0</span>
-                                <p class="text-xs font-bold uppercase text-slate-400 mt-1">SEI Arquivados</p>
-                            </div>
+                            <div class="mb-4"><span class="text-4xl font-black text-slate-700 dark:text-slate-300" id="admin-count-sei">0</span><p class="text-xs font-bold uppercase text-slate-400 mt-1">SEI Arquivados</p></div>
                             <p class="text-sm text-slate-500 mb-6">Processos arquivados a mais de <span class="admin-days-display">30</span> dias.</p>
-                            <button onclick="window.deleteOldItems('sei')" class="w-full py-3 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold rounded-xl transition-all shadow-sm">
-                                Excluir Processos
-                            </button>
+                            <button onclick="window.deleteOldItems('sei')" class="w-full py-3 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold rounded-xl transition-all shadow-sm">Excluir Processos</button>
                         </div>
-                    </div>
-
-                    <div class="mt-8 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl flex items-start gap-3">
-                        <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                        <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                            <strong>Atenção:</strong> A exclusão por esta ferramenta remove permanentemente os dados do banco de dados. Certifique-se de fazer um backup antes de realizar limpezas em massa.
-                        </p>
                     </div>
                 </div>
             </div>
@@ -576,35 +503,40 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, updateDoc, deleteDoc, onSnapshot, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-
+        import { getFirestore, collection, doc, updateDoc, deleteDoc, onSnapshot, addDoc, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
         // CONFIGURAÇÃO DO FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyBXayopq4MYdUMxSNpxUzrDSVI4E0cvzSA",
-            authDomain: "projectcorrsaa.firebaseapp.com",
-            projectId: "projectcorrsaa",
-            storageBucket: "projectcorrsaa.firebasestorage.app",
-            messagingSenderId: "195329055930",
-            appId: "1:195329055930:web:01783b88ccaf2d9dfbf683",
-            measurementId: "G-SNGPRWRP40"
-        };
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+             firebaseConfig = {
+                apiKey: "AIzaSyBXayopq4MYdUMxSNpxUzrDSVI4E0cvzSA",
+                authDomain: "projectcorrsaa.firebaseapp.com",
+                projectId: "projectcorrsaa",
+                storageBucket: "projectcorrsaa.firebasestorage.app",
+                messagingSenderId: "195329055930",
+                appId: "1:195329055930:web:01783b88ccaf2d9dfbf683",
+                measurementId: "G-SNGPRWRP40"
+            };
+        }
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const analytics = getAnalytics(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'projectcorrsaa';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // ESTADO GLOBAL
-        let user = null;
+        // --- ESTADO DE SESSÃO & USUÁRIO ---
+        let currentAuthUser = null; // Usuário do sistema (não o do Firebase Auth)
+        let firebaseUser = null;    // Usuário técnico do Firebase
+        let systemUsers = [];       // Lista de usuários carregada do DB
+
+        // --- ESTADO GERAL ---
         let isDarkMode = localStorage.getItem('theme') === 'dark';
         let currentTab = 'dashboard';
-
-        // ESTADO DE DADOS
         let tasks = [];
         let seiData = [];
-        let calendarData = []; // Estado para eventos da agenda
+        let calendarData = [];
         let taskFilter = 'active';
         let taskSearch = '';
         let seiSearch = '';
@@ -615,28 +547,326 @@
         updateThemeIcon();
         updateDateDisplay();
 
-        // ---------------- AUTH ----------------
+        // ---------------- AUTHENTICATION LOGIC ----------------
         async function initAuth() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try { await signInWithCustomToken(auth, __initial_auth_token); } 
-                    catch (e) { await signInAnonymously(auth); }
-                } else { await signInAnonymously(auth); }
-            } catch (error) { try { await signInAnonymously(auth); } catch(e){} }
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                // Fallback attempt
+                try { await signInAnonymously(auth); } catch(e) { console.error("Fallback Auth Failed", e); }
+            }
         }
 
         onAuthStateChanged(auth, (u) => {
-            user = u;
-            if (user) {
-                setupTaskListener();
-                setupSeiListener();
-                setupCalendarListener();
-                const dbIndicator = document.getElementById('db-status-indicator');
-                if(dbIndicator) dbIndicator.classList.remove('opacity-0');
+            firebaseUser = u;
+            if (u) {
+                // Ao conectar no Firebase, carregamos os dados do sistema
+                setupSystemData(); 
+                
+                // 1. Verifica se tem usuário "Manter Conectado"
+                const savedUser = localStorage.getItem('corrsaa_user');
+                
+                // 2. Verifica se tem "último usuário digitado" (preencher campo)
+                const lastUsername = localStorage.getItem('corrsaa_last_username');
+                if(lastUsername && !savedUser) {
+                    document.getElementById('login-user').value = lastUsername;
+                }
+
+                if (savedUser) {
+                    const parsedUser = JSON.parse(savedUser);
+                    // Tenta autologin
+                    finalizeLogin(parsedUser, true, false); 
+                } else {
+                    // Esconde o loader inicial e mostra tela de login
+                    const appLoader = document.getElementById('app-loader');
+                    if(appLoader) {
+                        appLoader.style.opacity = '0';
+                        setTimeout(() => appLoader.classList.add('hidden-elm'), 500);
+                    }
+                }
             }
         });
 
-        // ---------------- DATA LISTENERS ----------------
+        function setupSystemData() {
+            // Listeners principais
+            setupTaskListener();
+            setupSeiListener();
+            setupCalendarListener();
+            setupUsersListener(); // Novo listener para usuários
+            
+            const dbIndicator = document.getElementById('db-status-indicator');
+            if(dbIndicator) dbIndicator.classList.remove('opacity-0');
+        }
+
+        function setupUsersListener() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'users'), (snapshot) => {
+                systemUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (currentAuthUser && currentAuthUser.role === 'DEV') {
+                    renderAdminUserList();
+                }
+            }, (error) => {
+                console.error("Error creating users listener:", error);
+            });
+        }
+
+        // --- LOGIN DO SISTEMA ---
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const remember = document.getElementById('login-remember').checked;
+
+            await performLogin(user, pass, remember);
+        });
+
+        async function performLogin(username, password, remember) {
+            // Salva o último usuário digitado para conveniência futura, independente do sucesso
+            localStorage.setItem('corrsaa_last_username', username);
+
+            // 1. Check Master Login (DEV)
+            if (username === 'DEV' && password === '1408') {
+                const devUser = { username: 'DEV', role: 'DEV', name: 'Desenvolvedor' };
+                finalizeLogin(devUser, remember);
+                return;
+            }
+
+            // 2. Check Database Users
+            // Nota: systemUsers é carregado de forma assíncrona. Se for o primeiro load, pode estar vazio.
+            // Para garantir login rápido em conexões lentas, idealmente seria uma query direta, 
+            // mas como systemUsers é pequeno, o listener costuma ser rápido.
+            
+            const foundUser = systemUsers.find(u => u.username === username && u.password === password);
+            if (foundUser) {
+                finalizeLogin(foundUser, remember);
+            } else {
+                // Fallback: se a lista ainda não carregou, fazemos uma query direta única
+                try {
+                    const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'users'), where("username", "==", username), where("password", "==", password));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        const userDoc = querySnapshot.docs[0].data();
+                        finalizeLogin(userDoc, remember);
+                    } else {
+                        showToast("Usuário ou senha incorretos", "error");
+                    }
+                } catch(e) {
+                    showToast("Usuário não encontrado (Verifique conexão)", "error");
+                }
+            }
+        }
+
+        function finalizeLogin(userObj, remember, showWelcome = true) {
+            currentAuthUser = userObj;
+            
+            // Lógica de "Manter conectado"
+            if (remember) {
+                localStorage.setItem('corrsaa_user', JSON.stringify(userObj));
+            } else {
+                // Se não marcou "manter", garante que não tem lixo antigo de sessão
+                localStorage.removeItem('corrsaa_user');
+            }
+
+            // UI Updates
+            document.getElementById('login-screen').classList.add('hidden-elm');
+            document.getElementById('app').style.display = 'flex';
+            document.getElementById('sidebar-username').innerText = userObj.username;
+            document.getElementById('sidebar-role').innerText = userObj.role;
+            
+            // Remove o loader se ele ainda estiver visível (caso do autologin)
+            const appLoader = document.getElementById('app-loader');
+            if(appLoader && !appLoader.classList.contains('hidden-elm')) {
+                appLoader.classList.add('hidden-elm');
+            }
+
+            // Permissões
+            if (userObj.role === 'DEV') {
+                document.getElementById('nav-admin').parentElement.classList.remove('hidden-elm');
+                document.getElementById('mobile-nav-admin').classList.remove('hidden-elm');
+                document.getElementById('admin-cleanup-panel').classList.remove('hidden-elm');
+                document.getElementById('admin-user-panel').classList.remove('hidden-elm');
+                renderAdminUserList();
+            } else {
+                document.getElementById('nav-admin').parentElement.classList.add('hidden-elm');
+                document.getElementById('mobile-nav-admin').classList.add('hidden-elm');
+                document.getElementById('admin-cleanup-panel').classList.add('hidden-elm');
+                document.getElementById('admin-user-panel').classList.add('hidden-elm');
+                if (currentTab === 'admin') switchTab('dashboard');
+            }
+
+            if (showWelcome) showWelcomeModal(userObj.username);
+        }
+
+        function logout() {
+            currentAuthUser = null;
+            // Remove a sessão persistente ("Manter conectado")
+            localStorage.removeItem('corrsaa_user');
+            
+            // Nota: NÃO removemos 'corrsaa_last_username' para facilitar o preenchimento no próximo login
+            
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-screen').classList.remove('hidden-elm');
+            
+            // Limpa senha mas mantém usuário se existir no storage
+            const lastUser = localStorage.getItem('corrsaa_last_username');
+            document.getElementById('login-user').value = lastUser || '';
+            document.getElementById('login-pass').value = '';
+        }
+
+        // --- GESTÃO DE USUÁRIOS (DEV) ---
+        async function createUser() {
+            if (!currentAuthUser || currentAuthUser.role !== 'DEV') return;
+            
+            const username = document.getElementById('new-user-name').value.trim();
+            const password = document.getElementById('new-user-pass').value.trim();
+            const role = document.getElementById('new-user-role').value;
+
+            if (!username || !password) return showToast("Preencha usuário e senha", "error");
+
+            // Check duplicata
+            if (systemUsers.find(u => u.username === username)) return showToast("Usuário já existe", "error");
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'users'), {
+                    username, password, role, createdAt: new Date().toISOString()
+                });
+                showToast("Usuário criado com sucesso!");
+                document.getElementById('new-user-name').value = '';
+                document.getElementById('new-user-pass').value = '';
+            } catch (e) {
+                showToast("Erro ao criar usuário", "error");
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm("Remover este usuário?")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id));
+                showToast("Usuário removido");
+            } catch (e) { showToast("Erro ao remover", "error"); }
+        }
+
+        function openChangePasswordModal(id, username) {
+            const container = document.getElementById('modal-container');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal()"></div>
+                    <div class="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-2xl animate-fade-in-up">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Alterar Senha</h3>
+                            <button onclick="window.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200">✕</button>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4">Nova senha para <strong>${username}</strong>:</p>
+                        <form id="change-pass-form">
+                            <input type="text" id="new-password-input" required class="w-full px-4 py-3 mb-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-sm" placeholder="Nova senha">
+                            <div class="flex gap-3">
+                                <button type="button" onclick="window.closeModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-sm transition-colors">Cancelar</button>
+                                <button type="submit" class="flex-1 py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl text-sm shadow-lg transition-colors">Salvar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('change-pass-form').onsubmit = (e) => {
+                e.preventDefault();
+                const newPass = document.getElementById('new-password-input').value.trim();
+                if(newPass) {
+                    updateUserPassword(id, newPass);
+                }
+            };
+        }
+
+        async function updateUserPassword(id, newPassword) {
+            if (!currentAuthUser || currentAuthUser.role !== 'DEV') return;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id), {
+                    password: newPassword
+                });
+                showToast("Senha alterada com sucesso!");
+                window.closeModal();
+            } catch (e) {
+                console.error(e);
+                showToast("Erro ao alterar senha", "error");
+            }
+        }
+
+        function renderAdminUserList() {
+            const tbody = document.getElementById('admin-users-list');
+            if (!tbody) return;
+            tbody.innerHTML = systemUsers.map(u => `
+                <tr class="bg-slate-800 border-b border-slate-700">
+                    <td class="px-4 py-3 font-medium text-white">${u.username}</td>
+                    <td class="px-4 py-3">${u.role}</td>
+                    <td class="px-4 py-3 font-mono text-xs opacity-50">${u.password}</td>
+                    <td class="px-4 py-3 text-right">
+                        <div class="flex justify-end gap-3">
+                            <button onclick="window.openChangePasswordModal('${u.id}', '${u.username}')" class="text-blue-400 hover:text-blue-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                Senha
+                            </button>
+                            <button onclick="window.deleteUser('${u.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Remover
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- WELCOME MODAL ---
+        function showWelcomeModal(username) {
+            const quotes = [
+                "O sucesso é a soma de pequenos esforços repetidos dia após dia.",
+                "Acredite que você pode, assim você já está no meio do caminho.",
+                "Não espere por oportunidades extraordinárias. Agarre ocasiões comuns e torne-as grandes.",
+                "Trabalhar em equipe é a união de várias forças para um único objetivo.",
+                "A única maneira de fazer um excelente trabalho é amar o que você faz."
+            ];
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+            const modalHtml = `
+                <div id="welcome-modal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in-up">
+                    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"></div>
+                    <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-8 text-center shadow-2xl border border-white/20">
+                        <div class="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span class="text-3xl">👋</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Bom dia, ${username}!</h2>
+                        <p class="text-slate-600 dark:text-slate-300 mb-6">Seja bem-vindo ao sistema integrado de informações da coordenação regional.</p>
+                        
+                        <div class="bg-slate-50 dark:bg-slate-800 p-6 rounded-2xl mb-6 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-brand-500"></div>
+                            <p class="italic text-slate-600 dark:text-slate-400 text-sm font-medium">"${randomQuote}"</p>
+                        </div>
+
+                        <p class="text-brand-600 dark:text-brand-400 font-bold uppercase tracking-wider text-xs mb-6">Desejo um bom trabalho!</p>
+                        
+                        <button onclick="document.getElementById('welcome-modal').remove()" class="bg-brand-600 hover:bg-brand-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-all">Começar</button>
+                    </div>
+                </div>
+            `;
+            
+            const div = document.createElement('div');
+            div.innerHTML = modalHtml;
+            document.body.appendChild(div);
+
+            // Auto close in 10s
+            setTimeout(() => {
+                const modal = document.getElementById('welcome-modal');
+                if (modal) {
+                    modal.style.opacity = '0';
+                    setTimeout(() => modal.remove(), 500);
+                }
+            }, 10000);
+        }
+
+        // ---------------- EXISTING LISTENERS & LOGIC ----------------
         function setupTaskListener() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'tasks'), (snapshot) => {
                 tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -645,8 +875,9 @@
                 renderKanban();
                 renderAdmin();
                 checkDeadlinesAndNotify();
-                const loader = document.getElementById('loader');
-                if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 500); }
+                // Loader logic moved to Auth State change to avoid race conditions with login screen
+            }, (error) => {
+                console.error("Error creating tasks listener:", error);
             });
         }
 
@@ -658,6 +889,8 @@
                 renderDashboard();
                 renderAdmin();
                 checkDeadlinesAndNotify();
+            }, (error) => {
+                console.error("Error creating SEI listener:", error);
             });
         }
 
@@ -665,7 +898,9 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snapshot) => {
                 calendarData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderCalendar(); 
-                renderDashboard(); // Atualiza dashboard com eventos
+                renderDashboard(); 
+            }, (error) => {
+                console.error("Error creating calendar listener:", error);
             });
         }
 
@@ -679,24 +914,20 @@
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
             
-            // Set Title
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             document.getElementById('calendar-title').innerText = `${monthNames[month]} ${year}`;
 
-            // Calc dates
             const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const daysInPrevMonth = new Date(year, month, 0).getDate();
 
             let html = '';
 
-            // Previous Month Fillers
             for (let i = firstDay - 1; i >= 0; i--) {
                 const d = daysInPrevMonth - i;
                 html += `<div class="calendar-cell bg-white/50 dark:bg-slate-900/30 p-2 text-slate-300 dark:text-slate-600 select-none pointer-events-none text-right"><span class="text-sm font-medium">${d}</span></div>`;
             }
 
-            // Current Month
             const today = new Date();
             const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
@@ -704,7 +935,15 @@
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 const isToday = isCurrentMonth && today.getDate() === i;
                 
-                // Filter events for this day
+                // Change background if today
+                const cellClasses = isToday 
+                    ? "calendar-cell bg-blue-50 dark:bg-blue-900/20 p-2 flex flex-col h-full cursor-pointer ring-2 ring-inset ring-brand-500" // Highlighting entire cell
+                    : "calendar-cell bg-white dark:bg-slate-900 p-2 flex flex-col h-full cursor-pointer";
+
+                const numberClasses = isToday
+                    ? "text-sm font-bold text-brand-700 dark:text-brand-400 inline-block"
+                    : "text-sm font-semibold text-slate-700 dark:text-slate-300 inline-block";
+                
                 const dayEvents = calendarData.filter(e => e.date === dateStr).sort((a,b) => (a.time || '23:59').localeCompare(b.time || '23:59'));
 
                 const eventsHtml = dayEvents.map(e => {
@@ -724,9 +963,9 @@
                 }).join('');
 
                 html += `
-                    <div class="calendar-cell bg-white dark:bg-slate-900 p-2 flex flex-col h-full cursor-pointer" onclick="window.openEventModal(null, '${dateStr}')">
+                    <div class="${cellClasses}" onclick="window.openEventModal(null, '${dateStr}')">
                         <div class="text-right mb-1">
-                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 inline-block ${isToday ? 'today-highlight' : ''}">${i}</span>
+                            <span class="${numberClasses}">${i}</span>
                         </div>
                         <div class="flex-1 overflow-y-auto custom-scrollbar">
                             ${eventsHtml}
@@ -735,7 +974,6 @@
                 `;
             }
 
-            // Next Month Fillers to complete grid (42 cells total usually covers 6 rows)
             const totalCells = firstDay + daysInMonth;
             const remaining = 7 - (totalCells % 7);
             if (remaining < 7) {
@@ -824,7 +1062,7 @@
         }
 
         async function saveEvent(eventData, id = null) {
-            if (!user) return;
+            if (!currentAuthUser) return;
             try {
                 const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
                 if (id) await updateDoc(doc(collectionRef, id), eventData);
@@ -848,7 +1086,7 @@
             const hour = new Date().getHours();
             const greeting = hour < 12 ? 'Bom dia' : (hour < 18 ? 'Boa tarde' : 'Boa noite');
             const welcomeEl = document.getElementById('dash-welcome');
-            if(welcomeEl) welcomeEl.innerText = `${greeting}, Usuário`;
+            if(welcomeEl) welcomeEl.innerText = `${greeting}, ${currentAuthUser ? currentAuthUser.username : 'Usuário'}`;
 
             const totalTasks = tasks.filter(t => !t.completed).length;
             const urgentTasks = tasks.filter(t => !t.completed && t.priority === 'high').length;
@@ -891,7 +1129,7 @@
                 `}).join('') : '<p class="text-sm text-slate-400">Nenhum processo vencendo.</p>';
             }
 
-            // --- EVENTS LIST (NEW) ---
+            // --- EVENTS LIST ---
             const eventsListEl = document.getElementById('dash-events-list');
             if(eventsListEl) {
                 const today = new Date();
@@ -959,6 +1197,10 @@
         }
 
         async function deleteOldItems(type) {
+            if (!currentAuthUser || currentAuthUser.role !== 'DEV') {
+                return showToast("Acesso negado: Somente DEV.", "error");
+            }
+
             const daysInput = document.getElementById('admin-days');
             const days = parseInt(daysInput.value) || 30;
             const cutoffDate = new Date();
@@ -989,7 +1231,6 @@
 
             showToast("Iniciando exclusão em massa...", "warning");
 
-            const batch = writeBatch(db);
             let count = 0;
             
             const chunkSize = 400; 
@@ -1141,7 +1382,7 @@
         }
 
         async function saveTask(taskData, id = null) {
-            if (!user) return;
+            if (!currentAuthUser) return;
             const btn = document.querySelector('#task-form button[type="submit"]');
             if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
             try {
@@ -1154,7 +1395,7 @@
         }
 
         async function saveSei(seiRecord, id = null) {
-            if(!user) return;
+            if(!currentAuthUser) return;
             const btn = document.querySelector('#sei-form button[type="submit"]');
             if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
             try {
@@ -1841,7 +2082,9 @@
             toggleTheme, closeModal, openBackupModal, copyToClipboard, downloadBackup, processImport, 
             requestNotificationPermission, allowDrop, drag, drop, createTaskFromSei,
             // Calendar specific
-            changeMonth, goToToday, openEventModal, saveEvent, deleteEvent
+            changeMonth, goToToday, openEventModal, saveEvent, deleteEvent,
+            // New User Functions
+            createUser, deleteUser, logout, openChangePasswordModal
         });
 
         initAuth();
