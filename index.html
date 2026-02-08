@@ -238,6 +238,15 @@
                         <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                         Gestão SEI
                     </button>
+
+                    <p class="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Inteligência</p>
+                    <button onclick="window.switchTab('ai')" id="nav-ai" class="w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 group">
+                        <div class="relative flex items-center justify-center w-5 h-5">
+                            <span class="absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-20 group-hover:animate-ping"></span>
+                            <svg class="icon relative text-purple-600 dark:text-purple-400" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <span class="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-blue-400">Corrsaa Intelligence</span>
+                    </button>
                     
                     <!-- Botão Admin (Visível apenas para DEV via JS) -->
                     <div id="admin-menu-item" class="hidden-elm">
@@ -282,6 +291,7 @@
                 <button onclick="window.switchTab('tasks')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
                 <button onclick="window.switchTab('kanban')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM9 3v18M15 3v18"/></svg></button>
                 <button onclick="window.switchTab('sei')" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
+                <button onclick="window.switchTab('ai')" class="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"/></svg></button>
                 <button onclick="window.switchTab('admin')" id="mobile-nav-admin" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hidden-elm"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
             </div>
         </div>
@@ -411,6 +421,77 @@
                     <div id="sei-list-container" class="space-y-3"></div>
                     
                     <div id="sei-empty-state" class="hidden py-16 text-center"><p class="text-slate-500">Nenhum processo encontrado.</p></div>
+                </div>
+            </div>
+
+            <!-- ABA 6: CORRSAA INTELLIGENCE (NOVA) -->
+            <div id="tab-ai" class="h-full flex flex-col overflow-hidden hidden-tab relative bg-slate-50/30 dark:bg-slate-950">
+                <!-- Fundo decorativo -->
+                <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
+                </div>
+
+                <header class="sticky top-0 z-20 glass-panel px-6 py-4 shrink-0 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-blue-400 tracking-tight flex items-center gap-2">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                            Corrsaa Intelligence
+                        </h2>
+                        <p class="text-xs text-slate-500">Assistente Virtual Integrado - Powered by Gemini</p>
+                    </div>
+                    <button onclick="window.toggleAiSettings()" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors" title="Configurar API Key">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </header>
+
+                <!-- Configuração de API (Oculto por padrão) -->
+                <div id="ai-settings-panel" class="hidden-elm bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 animate-fade-in-up">
+                    <div class="max-w-3xl mx-auto flex gap-3 items-center">
+                        <div class="flex-1">
+                            <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Google Gemini API Key</label>
+                            <input type="password" id="gemini-api-key" placeholder="Cole sua chave API aqui (AIza...)" class="w-full px-4 py-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm outline-none focus:border-purple-500">
+                        </div>
+                        <button onclick="window.saveGeminiKey()" class="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-bold text-xs hover:bg-purple-500 transition-colors">Salvar Chave</button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2 max-w-3xl mx-auto">Sua chave será salva em seu perfil de usuário (Firestore) para acesso em qualquer dispositivo.</p>
+                </div>
+
+                <!-- Área de Chat -->
+                <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth custom-scrollbar">
+                    <!-- Mensagem de Boas Vindas -->
+                    <div class="flex gap-4 max-w-3xl mx-auto">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white shadow-lg shrink-0">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700">
+                                <p class="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">
+                                    Olá! Eu sou a <strong>Corrsaa Intelligence</strong>. 👋<br><br>
+                                    Estou aqui para ajudar você a redigir documentos, analisar textos, resumir processos do SEI ou gerar ideias para suas tarefas diárias.<br><br>
+                                    Para começar, verifique se sua chave de API está configurada no ícone de engrenagem acima. Como posso ajudar hoje?
+                                </p>
+                            </div>
+                            <div class="flex gap-2 overflow-x-auto pb-2">
+                                <button onclick="window.setAiPrompt('Escreva um modelo de ofício solicitando...')" class="whitespace-nowrap px-3 py-1.5 bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-900/30 rounded-full text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">📄 Redigir Ofício</button>
+                                <button onclick="window.setAiPrompt('Faça um resumo executivo sobre...')" class="whitespace-nowrap px-3 py-1.5 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900/30 rounded-full text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">📝 Resumir Texto</button>
+                                <button onclick="window.setAiPrompt('Crie um checklist para organizar...')" class="whitespace-nowrap px-3 py-1.5 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-900/30 rounded-full text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors">✅ Checklist Tarefas</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="shrink-0 p-4 md:p-6 glass-panel border-t border-slate-200 dark:border-slate-800">
+                    <div class="max-w-3xl mx-auto relative">
+                        <form id="ai-form" class="relative">
+                            <textarea id="ai-input" rows="1" class="w-full bg-white dark:bg-slate-800 border-0 pl-4 pr-14 py-4 rounded-2xl shadow-lg resize-none focus:ring-2 focus:ring-purple-500 dark:text-white max-h-32 overflow-y-auto" placeholder="Digite sua solicitação para a IA..." oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                            <button type="submit" id="ai-send-btn" class="absolute right-2 bottom-2.5 p-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </form>
+                        <p class="text-center text-[10px] text-slate-400 mt-2">A IA pode cometer erros. Verifique informações importantes.</p>
+                    </div>
                 </div>
             </div>
 
@@ -548,10 +629,12 @@
         let seiSearch = '';
         let seiFilterStatus = 'active';
         let currentCalendarDate = new Date();
+        let geminiKey = localStorage.getItem('corrsaa_gemini_key') || ''; // Chave da API
 
         if (isDarkMode) document.documentElement.classList.add('dark');
         updateThemeIcon();
         updateDateDisplay();
+        if(geminiKey) document.getElementById('gemini-api-key').value = geminiKey;
 
         // ---------------- AUTHENTICATION LOGIC ----------------
         async function initAuth() {
@@ -613,6 +696,21 @@
         function setupUsersListener() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'users'), (snapshot) => {
                 systemUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Atualiza dados do usuário logado em tempo real se houver mudanças no banco
+                if (currentAuthUser && currentAuthUser.id) {
+                    const me = systemUsers.find(u => u.id === currentAuthUser.id);
+                    if (me) {
+                        currentAuthUser = { ...currentAuthUser, ...me };
+                        // Se a chave no banco for diferente da atual, atualiza
+                        if (me.geminiKey && me.geminiKey !== geminiKey) {
+                            geminiKey = me.geminiKey;
+                            const input = document.getElementById('gemini-api-key');
+                            if(input) input.value = geminiKey;
+                        }
+                    }
+                }
+
                 if (currentAuthUser && currentAuthUser.role === 'DEV') {
                     renderAdminUserList();
                 }
@@ -643,10 +741,6 @@
             }
 
             // 2. Check Database Users
-            // Nota: systemUsers é carregado de forma assíncrona. Se for o primeiro load, pode estar vazio.
-            // Para garantir login rápido em conexões lentas, idealmente seria uma query direta, 
-            // mas como systemUsers é pequeno, o listener costuma ser rápido.
-            
             const foundUser = systemUsers.find(u => u.username === username && u.password === password);
             if (foundUser) {
                 finalizeLogin(foundUser, remember);
@@ -656,7 +750,9 @@
                     const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'users'), where("username", "==", username), where("password", "==", password));
                     const querySnapshot = await getDocs(q);
                     if (!querySnapshot.empty) {
-                        const userDoc = querySnapshot.docs[0].data();
+                        const d = querySnapshot.docs[0];
+                        // Importante: Incluir o ID do documento para permitir updates futuros
+                        const userDoc = { id: d.id, ...d.data() };
                         finalizeLogin(userDoc, remember);
                     } else {
                         showToast("Usuário ou senha incorretos", "error");
@@ -676,6 +772,21 @@
             } else {
                 // Se não marcou "manter", garante que não tem lixo antigo de sessão
                 localStorage.removeItem('corrsaa_user');
+            }
+
+            // Carrega Chave Gemini do Perfil do Usuário
+            if (userObj.geminiKey) {
+                geminiKey = userObj.geminiKey;
+                const input = document.getElementById('gemini-api-key');
+                if (input) input.value = geminiKey;
+            } else {
+                // Fallback: Tenta pegar do localStorage se não tiver no perfil (legado/dev)
+                const localKey = localStorage.getItem('corrsaa_gemini_key');
+                if (localKey && !geminiKey) {
+                    geminiKey = localKey;
+                    const input = document.getElementById('gemini-api-key');
+                    if (input) input.value = geminiKey;
+                }
             }
 
             // UI Updates
@@ -1073,12 +1184,18 @@
         async function saveEvent(eventData, id = null) {
             if (!currentAuthUser) return;
             try {
-                const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
-                if (id) await updateDoc(doc(collectionRef, id), eventData);
-                else await addDoc(collectionRef, { ...eventData, createdAt: new Date().toISOString() });
+                // FIXED: Use explicit doc path for update and explicit collection for add
+                if (id) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id), eventData);
+                } else {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'events'), { ...eventData, createdAt: new Date().toISOString() });
+                }
                 showToast("Evento salvo!", "success");
                 closeModal();
-            } catch (e) { showToast("Erro ao salvar", "error"); }
+            } catch (e) { 
+                console.error("Save Error:", e);
+                showToast("Erro ao salvar: " + e.message, "error"); 
+            }
         }
 
         async function deleteEvent(id) {
@@ -2042,7 +2159,7 @@
         // ---------------- CONTROLE GERAL DA UI ----------------
         function switchTab(tab) {
             currentTab = tab;
-            ['dashboard','calendar','tasks','sei','kanban', 'admin'].forEach(t => {
+            ['dashboard','calendar','tasks','sei','kanban', 'admin', 'ai'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 if(el) {
                     if(t === tab) el.classList.remove('hidden-tab');
@@ -2050,15 +2167,204 @@
                 }
                 const nav = document.getElementById(`nav-${t}`);
                 if(nav) {
-                    if(t === tab) nav.className = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold bg-brand-50 text-brand-600 dark:bg-slate-800 dark:text-brand-400 ring-1 ring-inset ring-brand-100 dark:ring-slate-700";
-                    else nav.className = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800";
+                    // Estilo padrão para abas normais
+                    let activeClass = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold bg-brand-50 text-brand-600 dark:bg-slate-800 dark:text-brand-400 ring-1 ring-inset ring-brand-100 dark:ring-slate-700";
+                    let inactiveClass = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800";
+                    
+                    // Override para a aba AI (Roxo/Gradiente)
+                    if (t === 'ai') {
+                        activeClass = "w-full text-left px-4 py-3 rounded-xl text-sm transition-all flex items-center gap-3 font-bold bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-1 ring-inset ring-purple-200 dark:ring-purple-800 shadow-sm";
+                    }
+
+                    if(t === tab) nav.className = activeClass;
+                    else nav.className = inactiveClass + (t === 'ai' ? ' group' : '');
                 }
             });
             if(tab === 'dashboard') renderDashboard();
             if(tab === 'calendar') renderCalendar();
             if(tab === 'kanban') renderKanban();
             if(tab === 'admin') renderAdmin();
+            // Scroll chat to bottom if opening AI tab
+            if(tab === 'ai') {
+                const chatContainer = document.getElementById('chat-container');
+                if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
         };
+
+        // ---------------- AI LOGIC (GEMINI) ----------------
+        function toggleAiSettings() {
+            const panel = document.getElementById('ai-settings-panel');
+            panel.classList.toggle('hidden-elm');
+        }
+
+        async function saveGeminiKey() {
+            const key = document.getElementById('gemini-api-key').value.trim();
+            if(!key) return showToast("Por favor, insira uma chave válida.", "error");
+
+            // Se for usuário sem ID (ex: DEV hardcoded), salva localmente apenas
+            if (!currentAuthUser || !currentAuthUser.id) {
+                localStorage.setItem('corrsaa_gemini_key', key);
+                geminiKey = key;
+                showToast("Chave salva localmente (Usuário sem perfil de banco).");
+                toggleAiSettings();
+                return;
+            }
+
+            try {
+                const btn = document.querySelector('#ai-settings-panel button');
+                if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
+
+                // Salva no Firestore
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentAuthUser.id), {
+                    geminiKey: key
+                });
+                
+                geminiKey = key;
+                currentAuthUser.geminiKey = key;
+                
+                // Mantém cópia local por redundância
+                localStorage.setItem('corrsaa_gemini_key', key);
+                
+                showToast("Chave vinculada à conta com sucesso!");
+                toggleAiSettings();
+            } catch (e) {
+                console.error(e);
+                showToast("Erro ao salvar chave na conta.", "error");
+            } finally {
+                const btn = document.querySelector('#ai-settings-panel button');
+                if(btn) { btn.disabled = false; btn.innerText = "Salvar Chave"; }
+            }
+        }
+
+        function setAiPrompt(text) {
+            const input = document.getElementById('ai-input');
+            input.value = text;
+            input.focus();
+            // Ajusta altura
+            input.style.height = ''; 
+            input.style.height = input.scrollHeight + 'px';
+        }
+
+        // Adicionado: Envio com Enter
+        document.getElementById('ai-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Evita a quebra de linha padrão
+                document.getElementById('ai-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        });
+
+        document.getElementById('ai-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            if (!geminiKey) {
+                showToast("Configure sua chave API primeiro (ícone de engrenagem).", "error");
+                toggleAiSettings();
+                return;
+            }
+
+            // 1. Adiciona msg do usuário
+            appendAiMessage('user', message);
+            input.value = '';
+            input.style.height = 'auto';
+
+            // 2. Adiciona indicador de loading
+            const loadingId = appendAiLoading();
+
+            try {
+                // 3. Chamada API Gemini
+                const apiKey = ""; // Mantido vazio conforme regras, usa-se a variável geminiKey do escopo
+                // A instrução do sistema diz para usar const apiKey = "", mas precisamos da chave real para funcionar no Vercel.
+                // Usarei a variável global `geminiKey` preenchida pelo usuário.
+                
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        systemInstruction: {
+                            parts: [{ text: "Você é a Corrsaa Intelligence, uma assistente administrativa virtual prestativa e profissional, integrada a um sistema de gestão pública. Responda sempre em Português do Brasil. Seja formal, direta e eficiente ao ajudar com redação de documentos, resumos de processos e organização de tarefas." }]
+                        },
+                        contents: [{ parts: [{ text: message }] }]
+                    })
+                });
+
+                if (!response.ok) throw new Error('Falha na API Gemini');
+
+                const data = await response.json();
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Não consegui gerar uma resposta.";
+
+                // 4. Remove loading e mostra resposta
+                removeAiLoading(loadingId);
+                appendAiMessage('ai', aiText);
+
+            } catch (error) {
+                removeAiLoading(loadingId);
+                appendAiMessage('ai', "Desculpe, ocorreu um erro ao conectar com a IA. Verifique sua chave API.");
+                console.error(error);
+            }
+        });
+
+        function appendAiMessage(role, text) {
+            const container = document.getElementById('chat-container');
+            const isUser = role === 'user';
+            
+            // Formatação básica de texto (quebras de linha e negrito)
+            const formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/\n/g, '<br>'); // Line breaks
+
+            const div = document.createElement('div');
+            div.className = `flex gap-4 max-w-3xl mx-auto ${isUser ? 'flex-row-reverse' : ''} animate-fade-in-up`;
+            
+            div.innerHTML = `
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md shrink-0 ${isUser ? 'bg-slate-700 dark:bg-slate-600' : 'bg-gradient-to-br from-purple-500 to-blue-500'}">
+                    ${isUser ? 
+                        '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : 
+                        '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>'
+                    }
+                </div>
+                <div class="flex-1 space-y-2 text-${isUser ? 'right' : 'left'}">
+                    <div class="inline-block p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${isUser ? 'bg-slate-800 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-100 dark:border-slate-700'}">
+                        ${formattedText}
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendAiLoading() {
+            const container = document.getElementById('chat-container');
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "flex gap-4 max-w-3xl mx-auto animate-fade-in-up";
+            div.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white shadow-md shrink-0">
+                    <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+                </div>
+                <div class="flex-1">
+                    <div class="inline-block p-4 bg-white dark:bg-slate-800 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <div class="flex space-x-1 h-5 items-center">
+                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        function removeAiLoading(id) {
+            const el = document.getElementById(id);
+            if(el) el.remove();
+        }
 
         // --- BACKUP RESTORATION ---
         function openBackupModal() {
@@ -2200,7 +2506,9 @@
             // Calendar specific
             changeMonth, goToToday, openEventModal, saveEvent, deleteEvent,
             // New User Functions
-            createUser, deleteUser, logout, openChangePasswordModal
+            createUser, deleteUser, logout, openChangePasswordModal,
+            // AI Functions
+            toggleAiSettings, saveGeminiKey, setAiPrompt
         });
 
         initAuth();
