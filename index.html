@@ -132,7 +132,6 @@
         .dark .calendar-cell:hover {
             background-color: rgba(30, 41, 59, 0.8);
         }
-        /* CSS .today-highlight removido a pedido */
 
         /* Login Screen */
         #login-screen {
@@ -188,7 +187,7 @@
 
     <!-- SISTEMA PRINCIPAL -->
     <div id="app" class="h-full flex flex-col md:flex-row">
-        <!-- Loader Interno (renomeado para evitar conflito) -->
+        <!-- Loader Interno -->
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-slate-950 transition-opacity duration-500" id="app-loader">
             <div class="flex flex-col items-center gap-4">
                 <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
@@ -332,7 +331,6 @@
                 </div>
             </div>
 
-            <!-- OUTRAS ABAS (CALENDAR, TASKS, KANBAN, SEI - MANTIDAS IGUAIS) -->
             <!-- ABA 1: CALENDAR -->
             <div id="tab-calendar" class="h-full flex flex-col overflow-hidden hidden-tab bg-white dark:bg-slate-950">
                 <header class="sticky top-0 z-20 glass-panel px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 border-b border-slate-200 dark:border-slate-800">
@@ -396,15 +394,23 @@
                         </div>
                     </div>
                     <div id="sei-alerts-container" class="mb-6"></div>
-                    <div class="card-glass rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase w-32">Nº SEI</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase min-w-[200px]">Assunto</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase hidden md:table-cell">Direção</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase hidden md:table-cell">Responsável</th><th class="text-center py-4 px-4 text-xs font-bold text-slate-500 uppercase">Prioridade</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase">Prazo</th><th class="text-left py-4 px-4 text-xs font-bold text-slate-500 uppercase">Status</th><th class="text-right py-4 px-4 text-xs font-bold text-slate-500 uppercase">Ações</th></tr></thead>
-                                <tbody id="sei-list-container" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
-                            </table>
-                        </div>
-                        <div id="sei-empty-state" class="hidden py-16 text-center"><p class="text-slate-500">Nenhum processo encontrado.</p></div>
+                    
+                    <!-- Cabeçalho de Colunas (Visível apenas em telas médias/grandes para referência) -->
+                    <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        <div class="col-span-2">Nº SEI / Data</div>
+                        <div class="col-span-3">Assunto</div>
+                        <div class="col-span-1 text-center">Direção</div>
+                        <div class="col-span-1">Responsável</div>
+                        <div class="col-span-1 text-center">Prioridade</div>
+                        <div class="col-span-1">Prazo</div>
+                        <div class="col-span-1">Status</div>
+                        <div class="col-span-2 text-right">Ações</div>
                     </div>
+
+                    <!-- Container da Lista (Cards) -->
+                    <div id="sei-list-container" class="space-y-3"></div>
+                    
+                    <div id="sei-empty-state" class="hidden py-16 text-center"><p class="text-slate-500">Nenhum processo encontrado.</p></div>
                 </div>
             </div>
 
@@ -574,7 +580,8 @@
                 // 2. Verifica se tem "último usuário digitado" (preencher campo)
                 const lastUsername = localStorage.getItem('corrsaa_last_username');
                 if(lastUsername && !savedUser) {
-                    document.getElementById('login-user').value = lastUsername;
+                    const userInput = document.getElementById('login-user');
+                    if(userInput) userInput.value = lastUsername;
                 }
 
                 if (savedUser) {
@@ -713,8 +720,10 @@
             
             // Limpa senha mas mantém usuário se existir no storage
             const lastUser = localStorage.getItem('corrsaa_last_username');
-            document.getElementById('login-user').value = lastUser || '';
-            document.getElementById('login-pass').value = '';
+            const userInput = document.getElementById('login-user');
+            const passInput = document.getElementById('login-pass');
+            if(userInput) userInput.value = lastUser || '';
+            if(passInput) passInput.value = '';
         }
 
         // --- GESTÃO DE USUÁRIOS (DEV) ---
@@ -1381,6 +1390,12 @@
             }
         }
 
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
         async function saveTask(taskData, id = null) {
             if (!currentAuthUser) return;
             const btn = document.querySelector('#task-form button[type="submit"]');
@@ -1528,18 +1543,21 @@
         function renderTaskCard(task) {
             const days = calculateDaysRemaining(task.dueDate);
             const status = getDeadlineStatus(task);
+            const formattedDate = formatDate(task.dueDate);
+            const absDays = String(Math.abs(days)).padStart(2, '0');
+            
             let deadlineText = '';
             let deadlineColorClass = 'text-slate-500';
             
             if (task.dueDate) {
                 if (status === 'overdue') {
-                    deadlineText = `Atrasado: ${Math.abs(days)} dias`;
+                    deadlineText = `Atrasado há ${absDays} Dias • Prazo: ${formattedDate}`;
                     deadlineColorClass = 'text-red-600 font-bold';
                 } else if (status === 'soon') {
-                    deadlineText = days === 0 ? 'Vence: Hoje' : `Vence em: ${days} dias`;
+                    deadlineText = days === 0 ? 'Vence: Hoje' : `Restam ${absDays} Dias • Prazo: ${formattedDate}`;
                     deadlineColorClass = 'text-amber-600 font-bold';
                 } else {
-                    deadlineText = `Prazo: ${days} dias`;
+                    deadlineText = `Restam ${absDays} Dias • Prazo: ${formattedDate}`;
                     deadlineColorClass = 'text-slate-500';
                 }
             } else {
@@ -1552,10 +1570,16 @@
                 low: '<span class="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Baixa Prioridade</span>'
             }[task.priority] || '';
 
-            const cardBg = status === 'overdue' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800';
+            const priorityBorderClass = {
+                high: 'border-red-500 dark:border-red-500',
+                medium: 'border-amber-500 dark:border-amber-500',
+                low: 'border-blue-500 dark:border-blue-500'
+            }[task.priority] || 'border-slate-200 dark:border-slate-700';
+
+            const cardBg = status === 'overdue' ? 'bg-red-50 dark:bg-red-900/10' : 'bg-white dark:bg-slate-900';
 
             return `
-                <div class="group relative ${cardBg} rounded-xl p-4 border shadow-sm hover:shadow-md transition-all">
+                <div class="group relative ${cardBg} rounded-xl p-4 border ${priorityBorderClass} shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-start gap-4">
                         <label class="checkbox-wrapper relative flex items-center mt-1.5 cursor-pointer">
                             <input type="checkbox" class="sr-only" ${task.completed ? 'checked' : ''} onchange="window.toggleTaskComplete('${task.id}', ${task.completed})">
@@ -1599,10 +1623,19 @@
             else if (taskFilter === 'high') filtered = filtered.filter(t => !t.completed && t.priority === 'high');
 
             return filtered.sort((a, b) => {
+                 // 1. Ordenação por Prioridade (Alta > Média > Baixa)
+                 const pWeights = { 'high': 3, 'medium': 2, 'low': 1 };
+                 const wa = pWeights[a.priority] || 0;
+                 const wb = pWeights[b.priority] || 0;
+                 if (wa !== wb) return wb - wa; // Maior peso primeiro
+
+                 // 2. Critério de desempate: Status do Prazo (Atrasados primeiro)
                  const statusA = getDeadlineStatus(a);
                  const statusB = getDeadlineStatus(b);
                  if (statusA === 'overdue' && statusB !== 'overdue') return -1;
                  if (statusB === 'overdue' && statusA !== 'overdue') return 1;
+                 
+                 // 3. Critério final: Data de criação (Mais recentes primeiro)
                  return new Date(b.createdAt) - new Date(a.createdAt);
             });
         }
@@ -1656,6 +1689,22 @@
                 else if (seiFilterStatus === 'all') matchesStatus = true;
 
                 return matchesSearch && matchesStatus;
+            }).sort((a, b) => {
+                // 1. Ordenação por Prioridade (Alta > Média > Baixa)
+                const pWeights = { 'high': 3, 'medium': 2, 'low': 1 };
+                const wa = pWeights[a.prioridade] || 0;
+                const wb = pWeights[b.prioridade] || 0;
+                if (wa !== wb) return wb - wa;
+
+                // 2. Critério de desempate: Menor prazo primeiro (mais urgente)
+                if (a.prazo_resposta && b.prazo_resposta) {
+                    return new Date(a.prazo_resposta) - new Date(b.prazo_resposta);
+                }
+                // Se um tem prazo e o outro não, o que tem prazo vem primeiro
+                if (a.prazo_resposta && !b.prazo_resposta) return -1;
+                if (!a.prazo_resposta && b.prazo_resposta) return 1;
+
+                return 0;
             });
 
             const urgentSeis = seiData.filter(s => 
@@ -1700,21 +1749,28 @@
             container.innerHTML = filtered.map(sei => {
                 const deadlineDisplay = getSeiDeadlineDisplay(sei.prazo_resposta, sei.status);
                 const statusBadge = {
-                    'pendente': '<span class="status-pill bg-amber-100 text-amber-700">Pendente</span>',
-                    'em_andamento': '<span class="status-pill bg-blue-100 text-blue-700">Andamento</span>',
-                    'respondido': '<span class="status-pill bg-green-100 text-green-700">Respondido</span>',
-                    'arquivado': '<span class="status-pill bg-slate-100 text-slate-700 border border-slate-200">Arquivado</span>'
-                }[sei.status] || '<span class="status-pill bg-slate-100 text-slate-700">Desconhecido</span>';
+                    'pendente': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Pendente</span>',
+                    'em_andamento': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Andamento</span>',
+                    'respondido': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700">Respondido</span>',
+                    'arquivado': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">Arquivado</span>'
+                }[sei.status] || '<span class="text-xs text-slate-500">Desconhecido</span>';
 
                 const priorityBadge = {
                     high: '<span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Alta</span>',
                     medium: '<span class="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Média</span>',
                     low: '<span class="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Baixa</span>'
-                }[sei.prioridade] || '<span class="bg-slate-400 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">-</span>';
+                }[sei.prioridade] || '<span class="bg-slate-300 text-white text-[10px] px-2 py-0.5 rounded shadow-sm font-bold">-</span>';
+
+                // Definindo a cor da borda lateral (mais fina: border-l-4)
+                const borderClass = {
+                    high: 'border-l-4 border-l-red-500',
+                    medium: 'border-l-4 border-l-amber-500',
+                    low: 'border-l-4 border-l-blue-500'
+                }[sei.prioridade] || 'border-l-4 border-l-slate-300';
 
                 const directionBadge = sei.direcao === 'recebido' 
-                    ? '<span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">Recebido</span>' 
-                    : '<span class="text-xs font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded">Emitido</span>';
+                    ? '<span class="text-[10px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border border-blue-100 dark:border-blue-900 whitespace-nowrap">Recebido</span>' 
+                    : '<span class="text-[10px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded border border-purple-100 dark:border-purple-900 whitespace-nowrap">Emitido</span>';
 
                 let dataRecDisplay = '-';
                 if (sei.data_recebimento) {
@@ -1722,34 +1778,70 @@
                     dataRecDisplay = `${dia}/${mes}/${ano}`;
                 }
 
+                // Layout em GRID para simular tabela, mas dentro de um DIV Card
                 return `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-100 dark:border-slate-800">
-                    <td class="py-4 px-4 align-top">
-                        <span class="sei-mono text-sm text-brand-600 font-bold whitespace-nowrap">${sei.numero_sei}</span>
-                        <div class="text-[10px] text-slate-400 mt-1 whitespace-nowrap">${dataRecDisplay}</div>
-                    </td>
-                    <td class="py-4 px-4 align-top">
-                        <div class="text-slate-800 dark:text-slate-200 font-medium text-sm line-clamp-2" title="${sei.assunto}">${sei.assunto}</div>
-                        ${sei.observacoes ? `<div class="text-xs text-slate-500 mt-1 font-medium bg-slate-100 dark:bg-slate-800 p-1.5 rounded inline-block max-w-xs truncate" title="${sei.observacoes}">${sei.observacoes}</div>` : ''}
-                    </td>
-                    <td class="py-4 px-4 hidden md:table-cell align-top">${directionBadge}</td>
-                    <td class="py-4 px-4 hidden md:table-cell align-top">
-                        <div class="flex items-center gap-1">
-                            <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">${(sei.responsavel || '?').charAt(0)}</div>
-                            <span class="text-xs font-medium text-slate-600 dark:text-slate-400 truncate max-w-[100px]">${sei.responsavel || 'Ñ atribuído'}</span>
+                <div class="group bg-white dark:bg-slate-900 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 ${borderClass} border-y border-r border-slate-100 dark:border-slate-800 p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        
+                        <!-- Coluna 1: Numero e Data -->
+                        <div class="md:col-span-2 overflow-hidden">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="sei-mono text-sm text-brand-600 dark:text-brand-400 font-bold whitespace-nowrap truncate" title="${sei.numero_sei}">${sei.numero_sei}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                ${dataRecDisplay}
+                            </div>
                         </div>
-                    </td>
-                    <td class="py-4 px-4 text-center align-top">${priorityBadge}</td>
-                    <td class="py-4 px-4 align-top"><div class="text-xs font-semibold whitespace-nowrap">${deadlineDisplay}</div></td>
-                    <td class="py-4 px-4 align-top">${statusBadge}</td>
-                    <td class="py-4 px-4 text-right align-top">
-                        <div class="flex justify-end gap-2">
-                             <button onclick="window.createTaskFromSei('${sei.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-brand-600 transition-colors" title="Criar Tarefa"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
-                             <button onclick="window.openSeiModal('${sei.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-brand-600 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                             <button onclick="window.confirmSeiDelete('${sei.id}')" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-red-600 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+
+                        <!-- Coluna 2: Assunto -->
+                        <div class="md:col-span-3">
+                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug" title="${sei.assunto}">${sei.assunto}</p>
+                            ${sei.observacoes ? `<p class="text-xs text-slate-500 mt-1 italic">Nota: ${sei.observacoes}</p>` : ''}
                         </div>
-                    </td>
-                </tr>
+
+                        <!-- Coluna 3: Direção (Mobile: Inline / Desktop: Center) -->
+                        <div class="md:col-span-1 flex md:justify-center">
+                            ${directionBadge}
+                        </div>
+
+                        <!-- Coluna 4: Responsável -->
+                        <div class="md:col-span-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">${(sei.responsavel || '?').charAt(0)}</div>
+                                <span class="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">${sei.responsavel || 'N/A'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Coluna 5: Prioridade -->
+                        <div class="md:col-span-1 flex md:justify-center">
+                            ${priorityBadge}
+                        </div>
+
+                        <!-- Coluna 6: Prazo -->
+                        <div class="md:col-span-1">
+                            <div class="text-xs">${deadlineDisplay}</div>
+                        </div>
+
+                        <!-- Coluna 7: Status -->
+                        <div class="md:col-span-1">
+                            ${statusBadge}
+                        </div>
+
+                        <!-- Coluna 8: Ações -->
+                        <div class="md:col-span-2 flex justify-end gap-2 border-t md:border-t-0 border-slate-100 dark:border-slate-800 pt-3 md:pt-0 mt-2 md:mt-0">
+                             <button onclick="window.createTaskFromSei('${sei.id}')" class="group p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40 transition-all shadow-sm" title="Gerar Tarefa">
+                                <svg class="w-4 h-4 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                             </button>
+                             <button onclick="window.openSeiModal('${sei.id}')" class="group p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-all shadow-sm" title="Editar">
+                                <svg class="w-4 h-4 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                             </button>
+                             <button onclick="window.confirmSeiDelete('${sei.id}')" class="group p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-all shadow-sm" title="Excluir">
+                                <svg class="w-4 h-4 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                             </button>
+                        </div>
+                    </div>
+                </div>
                 `;
             }).join('');
         }
@@ -1913,14 +2005,38 @@
         function calculateDaysRemaining(d){ if(!d) return 0; const diff = new Date(d+'T00:00:00') - new Date().setHours(0,0,0,0); return Math.ceil(diff/86400000); }
         function getDeadlineStatus(i){ const d=i.dueDate||i.prazo_resposta; let done=false; if(i.dueDate) done=i.completed; else done=i.status==='respondido'||i.status==='arquivado'; if(!d||done) return 'ok'; const diff=calculateDaysRemaining(d); if(diff<0) return 'overdue'; if(diff<=5) return 'soon'; return 'ok'; }
         function showToast(m,t='success'){ const c=document.getElementById('toast-container'); const e=document.createElement('div'); e.className=`p-4 rounded-xl shadow-xl text-sm font-bold text-white flex items-center gap-3 animate-slide-in-right backdrop-blur-md ${t==='success'?'bg-slate-900/90 dark:bg-white/90 dark:text-slate-900':'bg-red-500/90'}`; e.innerHTML=`<span>${t==='success'?'✓':'⚠️'}</span> ${m}`; c.appendChild(e); setTimeout(()=>{e.style.opacity='0';e.style.transform='translateY(10px)';setTimeout(()=>e.remove(),300)},3000); }
+        
         function getSeiDeadlineDisplay(prazo, status) {
             if (status === 'respondido') return '<span class="text-green-600 font-semibold">✓ Concluído</span>';
             if (status === 'arquivado') return '<span class="text-slate-400">Arquivado</span>';
             if (!prazo) return '<span class="text-slate-400">Sem prazo</span>';
+            
             const days = calculateDaysRemaining(prazo);
-            if (days < 0) return `<span class="text-red-600 font-semibold">⚠️ ${Math.abs(days)}d atraso</span>`;
-            if (days <= 3) return `<span class="text-amber-600 font-semibold">⏰ ${days}d restantes</span>`;
-            return `<span class="text-slate-500 font-medium">${days}d restantes</span>`;
+            const dateStr = formatDate(prazo);
+            const absDays = String(Math.abs(days)).padStart(2, '0');
+            
+            if (days < 0) {
+                return `
+                    <div class="flex flex-col">
+                        <span class="text-red-600 font-bold text-xs">Atrasado há ${absDays} Dias</span>
+                        <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap">Prazo: ${dateStr}</span>
+                    </div>`;
+            }
+            if (days === 0) {
+                 return `
+                    <div class="flex flex-col">
+                        <span class="text-amber-600 font-bold text-xs">Vence Hoje</span>
+                        <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap">Prazo: ${dateStr}</span>
+                    </div>`;
+            }
+            
+            const colorClass = days <= 3 ? 'text-amber-600 font-bold' : 'text-slate-500 font-medium';
+            
+            return `
+                <div class="flex flex-col">
+                    <span class="${colorClass} text-xs">Restam ${absDays} Dias</span>
+                    <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap">Prazo: ${dateStr}</span>
+                </div>`;
         }
 
         // ---------------- CONTROLE GERAL DA UI ----------------
